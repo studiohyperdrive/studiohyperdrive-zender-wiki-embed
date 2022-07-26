@@ -1,7 +1,10 @@
+import axios, { AxiosResponse } from 'axios';
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import litLogo from './assets/lit.svg';
+import { WikiIdResponse } from './my-element.types';
+import { getAvailableLangByPageId, getAvailableLangByTitle, getContentUrlByTitle } from './utils/api';
+import { currentLanguage } from './utils/language';
 
 /**
  * An example element.
@@ -11,11 +14,8 @@ import litLogo from './assets/lit.svg';
  */
 @customElement('my-element')
 export class MyElement extends LitElement {
-	/**
-	 * Copy for the read the docs hint.
-	 */
 	@property()
-	docsHint = 'Click on the Vite and Lit logos to learn more';
+	searchValue = 'earth';
 
 	/**
 	 * The number of times the button has been clicked.
@@ -23,96 +23,78 @@ export class MyElement extends LitElement {
 	@property({ type: Number })
 	count = 0;
 
+	@property()
+	data = 'placeholder';
+
 	render() {
 		return html`
-			<div>
-				<a href="https://vitejs.dev" target="_blank">
-					<img src="/vite.svg" class="logo" alt="Vite logo" />
-				</a>
-				<a href="https://lit.dev" target="_blank">
-					<img src=${litLogo} class="logo lit" alt="Lit logo" />
-				</a>
-			</div>
+			<input @change=${(e: any) => (this.searchValue = e.target.value)} />
+			<button @click=${this.fetchWiki} part="button">fetch</button>
+			<p>${this.data}</p>
 			<slot></slot>
-			<div class="card">
-				<button @click=${this._onClick} part="button">count is ${this.count}</button>
-			</div>
-			<p class="read-the-docs">${this.docsHint}</p>
 		`;
 	}
 
-	private _onClick() {
-		this.count++;
+	private async getWikiByurl(url: string) {
+		const pageId = new URL(url).searchParams.get('curid');
+
+		if (pageId) {
+			const regex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org/i;
+			const [, , , languageCode] = url.match(regex) || [];
+			let urlByPageId = `https://${languageCode}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&pageids=${pageId}&explaintext&origin=*`;
+
+			if (languageCode !== currentLanguage) {
+				const langLinks = await getAvailableLangByPageId(pageId, languageCode);
+				const langLinkCurrLang = langLinks.find(({ lang }) => lang === currentLanguage);
+
+				urlByPageId = getContentUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
+			}
+
+			return urlByPageId;
+		}
+
+		const urlRegex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org\/wiki\/([a-zA-Z]+)/i;
+		const [, , , languageCode, title] = url.match(urlRegex) || [];
+		let wikiUrl = getContentUrlByTitle(title, languageCode);
+
+		if (languageCode !== currentLanguage) {
+			const langLinks = await getAvailableLangByTitle(title, languageCode);
+			const langLinkCurrLang = langLinks.find(({ code }) => code === currentLanguage);
+
+			wikiUrl = getContentUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
+		}
+
+		return wikiUrl;
 	}
 
+	private async getWikiByQid(wikiId: string) {
+		const id = wikiId.toUpperCase();
+
+		const fetchWikiTitleById: AxiosResponse<WikiIdResponse> = await axios.get(
+			`https://www.wikidata.org/w/api.php?action=wbgetentities&props=sitelinks&ids=${id}&format=json&origin=*`,
+		);
+		const titlesByLang = fetchWikiTitleById.data.entities?.[id]?.sitelinks;
+
+		const titleInCurrLang = titlesByLang?.[`${currentLanguage}wiki`] || titlesByLang?.['enwiki'];
+		const languageCode = titleInCurrLang.site.slice(0, 2);
+
+		const wikiUrl = getContentUrlByTitle(titleInCurrLang?.title, languageCode);
+
+		return wikiUrl;
+	}
+
+	private async fetchWiki() {
+		console.log(await this.getWikiByQid('q1'));
+		console.log(await this.getWikiByurl('https://nl.wikipedia.org/wiki/Wolk'));
+		console.log(await this.getWikiByurl('https://en.wikipedia.org/wiki?curid=47515'));
+	}
+
+	// eslint-disable-next-line @typescript-eslint/member-ordering
 	static styles = css`
 		:host {
-			max-width: 1280px;
-			margin: 0 auto;
-			padding: 2rem;
-			text-align: center;
-		}
-
-		.logo {
-			height: 6em;
-			padding: 1.5em;
-			will-change: filter;
-		}
-		.logo:hover {
-			filter: drop-shadow(0 0 2em #646cffaa);
-		}
-		.logo.lit:hover {
-			filter: drop-shadow(0 0 2em #325cffaa);
-		}
-
-		.card {
-			padding: 2em;
-		}
-
-		.read-the-docs {
-			color: #888;
-		}
-
-		h1 {
-			font-size: 3.2em;
-			line-height: 1.1;
-		}
-
-		a {
-			font-weight: 500;
-			color: #646cff;
-			text-decoration: inherit;
-		}
-		a:hover {
-			color: #535bf2;
-		}
-
-		button {
-			border-radius: 8px;
-			border: 1px solid transparent;
-			padding: 0.6em 1.2em;
-			font-size: 1em;
-			font-weight: 500;
-			font-family: inherit;
-			background-color: #1a1a1a;
-			cursor: pointer;
-			transition: border-color 0.25s;
-		}
-		button:hover {
-			border-color: #646cff;
-		}
-		button:focus,
-		button:focus-visible {
-			outline: 4px auto -webkit-focus-ring-color;
-		}
-
-		@media (prefers-color-scheme: light) {
-			a:hover {
-				color: #747bff;
-			}
-			button {
-				background-color: #f9f9f9;
-			}
+			display: block;
+			padding: 16px;
+			max-width: 800px;
 		}
 	`;
 }

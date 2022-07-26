@@ -45,6 +45,7 @@ export class MyElement extends LitElement {
 		this.count++;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/member-ordering
 	static styles = css`
 		:host {
 			max-width: 1280px;

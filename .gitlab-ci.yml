@@ -1,0 +1,13 @@
+stages:
+  - lint
+
+lint:
+  stage: lint
+  only:
+    - master
+    - merge_requests
+  image: node:gallium-alpine
+  before_script:
+    - yarn
+  script:
+    - yarn run lint

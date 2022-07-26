@@ -19,7 +19,6 @@ export interface Sitelinks {
 export interface LangWiki {
 	site: string;
 	title: string;
-	badges: any[];
 }
 
 export interface WikiLanglinksResponse {

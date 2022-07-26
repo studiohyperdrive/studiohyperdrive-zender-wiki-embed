@@ -2,6 +2,8 @@ import axios, { AxiosResponse } from 'axios';
 
 import { LanguageLinkResponse, WikiLanglinksResponse } from '../my-element.types';
 
+// TODO: use config to "store" api endpoints.
+
 export const getContentUrlByTitle = (title?: string, languageCode?: string) => {
 	if (!title || !languageCode) {
 		return '';

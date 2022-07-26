@@ -39,6 +39,7 @@ export class MyElement extends LitElement {
 		const pageId = new URL(url).searchParams.get('curid');
 
 		if (pageId) {
+			// Checks if string is a valid wikipedia url.Example https://en.wikipedia.org
 			const regex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org/i;
 			const [, , , languageCode] = url.match(regex) || [];
 			let urlByPageId = `https://${languageCode}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&pageids=${pageId}&explaintext&origin=*`;
@@ -53,6 +54,7 @@ export class MyElement extends LitElement {
 			return urlByPageId;
 		}
 
+		// Checks if string is a valid wikipedia article url with title. Example: https://en.wikipedia.org/wiki/Universe
 		const urlRegex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org\/wiki\/([a-zA-Z]+)/i;
 		const [, , , languageCode, title] = url.match(urlRegex) || [];
 		let wikiUrl = getContentUrlByTitle(title, languageCode);

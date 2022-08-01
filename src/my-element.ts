@@ -32,26 +32,41 @@ export class MyElement extends LitElement {
 	@property({ type: Object })
 	thumbnail: WikiImage = { source: '', height: 0, width: 0 };
 
+	@property()
+	pageSource = '';
+
 	render() {
 		/*
 			TODO: ask client if they want the styling of wikipedia.
 			${html`${unsafeHTML(this.description)}`}
 		*/
-
 		return html`
-			<input @change=${(e: any) => (this.searchValue = e.target.value)} />
-			<button @click=${this.fetchWiki} part="button">fetch</button>
-			<h1>${this.title}</h1>
-			<p>${this.description}</p>
-			${this.thumbnail.source
-				? html`
-						<img
-							src="${this.thumbnail.source}"
-							alt="photo of ${this.title}"
-							width="${this.thumbnail.width}"
-							height="${this.thumbnail.height}" />
-				  `
-				: ''}
+			<div>
+				<input @change=${(e: any) => (this.searchValue = e.target.value)} />
+				<button @click=${this.fetchWiki} part="button">fetch</button>
+			</div>
+
+			<div>
+				<div>
+					<h1>${this.title}</h1>
+					<p>${this.description}</p>
+				</div>
+
+				<div>
+					${this.thumbnail.source
+						? html`
+								<img
+									src="${this.thumbnail.source}"
+									alt="photo of ${this.title}"
+									width="${this.thumbnail.width}"
+									height="${this.thumbnail.height}" />
+						  `
+						: ''}
+				</div>
+
+				${this.pageSource ? html`<p>Read more: <a href="${this.pageSource}">${this.pageSource}</a></p>` : ''}
+			</div>
+
 			<slot></slot>
 		`;
 	}
@@ -136,12 +151,15 @@ export class MyElement extends LitElement {
 			this.title = '';
 			this.description = '';
 			this.thumbnail = { source: '', height: 0, width: 0 };
+			this.pageSource = '';
+
 			return;
 		}
 
 		this.description = summary.extract;
 		this.title = summary.title;
 		this.thumbnail = summary.thumbnail;
+		this.pageSource = summary.content_urls.desktop.page;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/member-ordering

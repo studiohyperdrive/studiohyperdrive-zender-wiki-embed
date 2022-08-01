@@ -34,7 +34,7 @@ export const getAvailableLangByTitle = async (rawTitle: string, languageCode: st
 	const title = cleanupTitle(rawTitle);
 
 	const fetchLangLinks: AxiosResponse<LanguageLinkResponse[]> = await axios.get(
-		`${config.wikiRestApiUrl(languageCode)}/${title}/links/language`,
+		`${config.wikiRestApiUrl2(languageCode)}/${title}/links/language`,
 	);
 
 	return fetchLangLinks.data;

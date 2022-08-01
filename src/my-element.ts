@@ -1,10 +1,12 @@
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { WikiImage, WikiSummaryResponse } from './my-element.types';
 import {
 	getAvailableLangByPageId,
 	getAvailableLangByTitle,
 	getContentUrlByTitle,
+	getSummaryByUrl,
 	getTitlesAndLangsByQid,
 } from './utils/api';
 import { currentLanguage } from './utils/language';
@@ -17,17 +19,38 @@ import { currentLanguage } from './utils/language';
  */
 @customElement('my-element')
 export class MyElement extends LitElement {
-	@property({ type: String })
+	@property()
 	searchValue = '';
 
 	@property()
-	data = 'placeholder';
+	title = '';
+
+	@property()
+	description = 'enter QId or a wikipedia page url';
+
+	@property({ type: Object })
+	thumbnail: WikiImage = { source: '', height: 0, width: 0 };
 
 	render() {
+		/*
+			TODO: ask client if they want the styling of wikipedia.
+			${html`${unsafeHTML(this.description)}`}
+		*/
+
 		return html`
 			<input @change=${(e: any) => (this.searchValue = e.target.value)} />
 			<button @click=${this.fetchWiki} part="button">fetch</button>
-			<p>${this.data}</p>
+			<h1>${this.title}</h1>
+			<p>${this.description}</p>
+			${this.thumbnail.source
+				? html`
+						<img
+							src="${this.thumbnail.source}"
+							alt="photo of ${this.title}"
+							width="${this.thumbnail.width}"
+							height="${this.thumbnail.height}" />
+				  `
+				: ''}
 			<slot></slot>
 		`;
 	}
@@ -52,7 +75,7 @@ export class MyElement extends LitElement {
 
 	private async getWikiByTitleUrl(url: string) {
 		// Checks if string is a valid wikipedia article url with title. Example: https://en.wikipedia.org/wiki/Universe
-		const urlRegex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org\/wiki\/([a-zA-Z]+)/i;
+		const urlRegex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org\/wiki\/([a-zA-Z]+_?[a-zA-Z]+)/;
 		const [, , , languageCode, title] = url.match(urlRegex) || [];
 
 		if (languageCode === currentLanguage) {
@@ -97,12 +120,27 @@ export class MyElement extends LitElement {
 		// Checks if search value is a Q ID. Example: Q44077
 		const searchRegex = /^q[0-9]+$/i;
 
+		let summary: WikiSummaryResponse | null = null;
+		let summaryUrl;
+
 		if (this.searchValue.match(searchRegex)) {
-			console.log(await this.getWikiByQid(this.searchValue));
+			summaryUrl = await this.getWikiByQid(this.searchValue);
+		} else {
+			summaryUrl = await this.getWikiByurl(this.searchValue);
+		}
+
+		summary = await getSummaryByUrl(summaryUrl);
+
+		if (!summary) {
+			this.title = '';
+			this.description = '';
+			this.thumbnail = { source: '', height: 0, width: 0 };
 			return;
 		}
 
-		console.log(await this.getWikiByurl(this.searchValue));
+		this.description = summary.extract;
+		this.title = summary.title;
+		this.thumbnail = summary.thumbnail;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/member-ordering

@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { config } from '../config';
-import { LanguageLinkResponse, WikiIdResponse, WikiLanglinksResponse } from '../my-element.types';
+import { LanguageLinkResponse, WikiIdResponse, WikiLanglinksResponse, WikiSummaryResponse } from '../my-element.types';
 
 const cleanupTitle = (rawTitle: string) => {
 	// Replace spaces with underscore.
@@ -47,4 +47,14 @@ export const getTitlesAndLangsByQid = async (wikiId: string) => {
 	const titlesByLang = fetchWikiTitleById.data.entities?.[id]?.sitelinks;
 
 	return titlesByLang;
+};
+
+export const getSummaryByUrl = async (url: string) => {
+	if (!url) {
+		return null;
+	}
+
+	const summary: AxiosResponse<WikiSummaryResponse> = await axios.get(url);
+
+	return summary.data;
 };

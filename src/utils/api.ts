@@ -1,30 +1,50 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { LanguageLinkResponse, WikiLanglinksResponse } from '../my-element.types';
+import { config } from '../config';
+import { LanguageLinkResponse, WikiIdResponse, WikiLanglinksResponse } from '../my-element.types';
 
-// TODO: use config to "store" api endpoints.
+const cleanupTitle = (rawTitle: string) => {
+	// Replace spaces with underscore.
+	return rawTitle.replace(/ /g, '_');
+};
 
-export const getContentUrlByTitle = (title?: string, languageCode?: string) => {
-	if (!title || !languageCode) {
+export const getContentUrlByTitle = (rawTitle?: string, languageCode?: string) => {
+	if (!rawTitle || !languageCode) {
 		return '';
 	}
 
-	return `https://${languageCode}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${title}&explaintext&origin=*`;
+	const title = cleanupTitle(rawTitle);
+
+	return `${config.wikiRestApiUrl(languageCode)}/summary/${title}`;
 };
 
 export const getAvailableLangByPageId = async (pageId: string, languageCode: string) => {
 	const fetchLangLinks: AxiosResponse<WikiLanglinksResponse> = await axios.get(
-		`https://${languageCode}.wikipedia.org/w/api.php?action=query&format=json&prop=langlinks&pageids=${pageId}&lllimit=500&origin=*`,
+		`${config.wikiActionApiUrl(languageCode)}&prop=langlinks&pageids=${pageId}`,
 	);
-	const langLinks = fetchLangLinks.data.query.pages[pageId].langlinks;
 
-	return langLinks;
+	return fetchLangLinks.data.query.pages?.[pageId];
 };
 
-export const getAvailableLangByTitle = async (title: string, languageCode: string) => {
+export const getAvailableLangByTitle = async (rawTitle: string, languageCode: string) => {
+	if (!rawTitle || !languageCode) {
+		return [];
+	}
+
+	const title = cleanupTitle(rawTitle);
+
 	const fetchLangLinks: AxiosResponse<LanguageLinkResponse[]> = await axios.get(
-		`https://${languageCode}.wikipedia.org/w/rest.php/v1/page/${title}/links/language`,
+		`${config.wikiRestApiUrl(languageCode)}/${title}/links/language`,
 	);
 
 	return fetchLangLinks.data;
+};
+
+export const getTitlesAndLangsByQid = async (wikiId: string) => {
+	const id = wikiId.toUpperCase();
+
+	const fetchWikiTitleById: AxiosResponse<WikiIdResponse> = await axios.get(`${config.wikidataActionApiUrl}&ids=${id}`);
+	const titlesByLang = fetchWikiTitleById.data.entities?.[id]?.sitelinks;
+
+	return titlesByLang;
 };

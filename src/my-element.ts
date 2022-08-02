@@ -1,3 +1,4 @@
+import './index';
 import { html, css, LitElement } from 'lit';
 // import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { customElement, property } from 'lit/decorators.js';

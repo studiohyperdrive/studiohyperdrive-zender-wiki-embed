@@ -1,9 +1,15 @@
-import axios, { AxiosResponse } from 'axios';
 import { html, css, LitElement } from 'lit';
+// import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { customElement, property } from 'lit/decorators.js';
 
-import { WikiIdResponse } from './my-element.types';
-import { getAvailableLangByPageId, getAvailableLangByTitle, getContentUrlByTitle } from './utils/api';
+import { WikiImage, WikiSummaryResponse } from './my-element.types';
+import {
+	getAvailableLangByPageId,
+	getAvailableLangByTitle,
+	getContentUrlByTitle,
+	getSummaryByUrl,
+	getTitlesAndLangsByQid,
+} from './utils/api';
 import { currentLanguage } from './utils/language';
 
 /**
@@ -15,67 +21,108 @@ import { currentLanguage } from './utils/language';
 @customElement('my-element')
 export class MyElement extends LitElement {
 	@property()
-	searchValue = 'earth';
-
-	/**
-	 * The number of times the button has been clicked.
-	 */
-	@property({ type: Number })
-	count = 0;
+	searchValue = '';
 
 	@property()
-	data = 'placeholder';
+	title = '';
+
+	@property()
+	description = 'enter QId or a wikipedia page url';
+
+	@property({ type: Object })
+	thumbnail: WikiImage = { source: '', height: 0, width: 0 };
+
+	@property()
+	pageSource = '';
 
 	render() {
+		/*
+			TODO: ask client if they want the styling of wikipedia.
+			${html`${unsafeHTML(this.description)}`}
+		*/
 		return html`
-			<input @change=${(e: any) => (this.searchValue = e.target.value)} />
-			<button @click=${this.fetchWiki} part="button">fetch</button>
-			<p>${this.data}</p>
+			<div>
+				<input @change=${(e: any) => (this.searchValue = e.target.value)} />
+				<button @click=${this.fetchWiki} part="button">fetch</button>
+			</div>
+
+			<div>
+				<div>
+					<h1>${this.title}</h1>
+					<p>${this.description}</p>
+				</div>
+
+				<div>
+					${this.thumbnail.source
+						? html`
+								<img
+									src="${this.thumbnail.source}"
+									alt="photo of ${this.title}"
+									width="${this.thumbnail.width}"
+									height="${this.thumbnail.height}" />
+						  `
+						: ''}
+				</div>
+
+				${this.pageSource ? html`<p>Read more: <a href="${this.pageSource}">${this.pageSource}</a></p>` : ''}
+			</div>
+
 			<slot></slot>
 		`;
+	}
+
+	private async getWikiByPageIdUrl(url: string, pageId: string) {
+		// Checks if string is a valid wikipedia url.Example https://en.wikipedia.org
+		const regex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org/i;
+		const [, , , languageCode] = url.match(regex) || [];
+		const infoBypageId = await getAvailableLangByPageId(pageId, languageCode);
+
+		if (languageCode === currentLanguage) {
+			const urlByPageId = getContentUrlByTitle(infoBypageId.title, languageCode);
+
+			return urlByPageId;
+		}
+
+		const langLinkCurrLang = infoBypageId.langlinks.find(({ lang }) => lang === currentLanguage);
+		const urlByPageId = getContentUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
+
+		return urlByPageId;
+	}
+
+	private async getWikiByTitleUrl(url: string) {
+		// Checks if string is a valid wikipedia article url with title. Example: https://en.wikipedia.org/wiki/Universe
+		const urlRegex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org\/wiki\/([a-zA-Z]+_?[a-zA-Z]+)/;
+		const [, , , languageCode, title] = url.match(urlRegex) || [];
+
+		if (languageCode === currentLanguage) {
+			const wikiUrl = getContentUrlByTitle(title, languageCode);
+
+			return wikiUrl;
+		}
+
+		const langLinks = await getAvailableLangByTitle(title, languageCode);
+		const langLinkCurrLang = langLinks.find(({ code }) => code === currentLanguage);
+		const wikiUrl = getContentUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
+
+		return wikiUrl;
 	}
 
 	private async getWikiByurl(url: string) {
 		const pageId = new URL(url).searchParams.get('curid');
 
 		if (pageId) {
-			// Checks if string is a valid wikipedia url.Example https://en.wikipedia.org
-			const regex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org/i;
-			const [, , , languageCode] = url.match(regex) || [];
-			let urlByPageId = `https://${languageCode}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&pageids=${pageId}&explaintext&origin=*`;
+			const summaryUrl = this.getWikiByPageIdUrl(url, pageId);
 
-			if (languageCode !== currentLanguage) {
-				const langLinks = await getAvailableLangByPageId(pageId, languageCode);
-				const langLinkCurrLang = langLinks.find(({ lang }) => lang === currentLanguage);
-
-				urlByPageId = getContentUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
-			}
-
-			return urlByPageId;
+			return summaryUrl;
 		}
 
-		// Checks if string is a valid wikipedia article url with title. Example: https://en.wikipedia.org/wiki/Universe
-		const urlRegex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org\/wiki\/([a-zA-Z]+)/i;
-		const [, , , languageCode, title] = url.match(urlRegex) || [];
-		let wikiUrl = getContentUrlByTitle(title, languageCode);
+		const summaryUrl = this.getWikiByTitleUrl(url);
 
-		if (languageCode !== currentLanguage) {
-			const langLinks = await getAvailableLangByTitle(title, languageCode);
-			const langLinkCurrLang = langLinks.find(({ code }) => code === currentLanguage);
-
-			wikiUrl = getContentUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
-		}
-
-		return wikiUrl;
+		return summaryUrl;
 	}
 
 	private async getWikiByQid(wikiId: string) {
-		const id = wikiId.toUpperCase();
-
-		const fetchWikiTitleById: AxiosResponse<WikiIdResponse> = await axios.get(
-			`https://www.wikidata.org/w/api.php?action=wbgetentities&props=sitelinks&ids=${id}&format=json&origin=*`,
-		);
-		const titlesByLang = fetchWikiTitleById.data.entities?.[id]?.sitelinks;
+		const titlesByLang = await getTitlesAndLangsByQid(wikiId);
 
 		const titleInCurrLang = titlesByLang?.[`${currentLanguage}wiki`] || titlesByLang?.['enwiki'];
 		const languageCode = titleInCurrLang.site.slice(0, 2);
@@ -86,9 +133,33 @@ export class MyElement extends LitElement {
 	}
 
 	private async fetchWiki() {
-		console.log(await this.getWikiByQid('q1'));
-		console.log(await this.getWikiByurl('https://nl.wikipedia.org/wiki/Wolk'));
-		console.log(await this.getWikiByurl('https://en.wikipedia.org/wiki?curid=47515'));
+		// Checks if search value is a Q ID. Example: Q44077
+		const searchRegex = /^q[0-9]+$/i;
+
+		let summary: WikiSummaryResponse | null = null;
+		let summaryUrl;
+
+		if (this.searchValue.match(searchRegex)) {
+			summaryUrl = await this.getWikiByQid(this.searchValue);
+		} else {
+			summaryUrl = await this.getWikiByurl(this.searchValue);
+		}
+
+		summary = await getSummaryByUrl(summaryUrl);
+
+		if (!summary) {
+			this.title = '';
+			this.description = '';
+			this.thumbnail = { source: '', height: 0, width: 0 };
+			this.pageSource = '';
+
+			return;
+		}
+
+		this.description = summary.extract;
+		this.title = summary.title;
+		this.thumbnail = summary.thumbnail;
+		this.pageSource = summary.content_urls.desktop.page;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/member-ordering

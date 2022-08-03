@@ -31,8 +31,6 @@ export class MyElement extends LitElement {
 	@property()
 	pageSource = '';
 
-	// defaultRadioValue = this.thumbnail?.source ? 'img-left' : 'no-img';
-
 	radioGroup = [
 		{
 			id: 'img-left',

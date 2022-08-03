@@ -64,7 +64,7 @@ export interface WikiSummaryResponse {
 	wikibase_item: string;
 	titles: Titles;
 	pageid: number;
-	thumbnail: WikiImage;
+	thumbnail?: WikiImage;
 	originalimage: WikiImage;
 	lang: string;
 	dir: string;

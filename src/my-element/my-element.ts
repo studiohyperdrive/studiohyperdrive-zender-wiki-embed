@@ -1,24 +1,20 @@
-import './index';
-import { html, css, LitElement } from 'lit';
+/* eslint-disable @typescript-eslint/member-ordering */
+import '../index';
+import { html, LitElement } from 'lit';
 // import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { customElement, property } from 'lit/decorators.js';
 
-import { WikiImage, WikiSummaryResponse } from './my-element.types';
 import {
 	getAvailableLangByPageId,
 	getAvailableLangByTitle,
 	getContentUrlByTitle,
 	getSummaryByUrl,
 	getTitlesAndLangsByQid,
-} from './utils/api';
-import { currentLanguage } from './utils/language';
+} from '../utils/api';
+import { currentLanguage } from '../utils/language';
+import { MyElementStyle } from './my-element.style';
+import { WikiImage, WikiSummaryResponse } from './my-element.types';
 
-/**
- * An example element.
- *
- * @slot - This element has a slot
- * @csspart button - The button
- */
 @customElement('my-element')
 export class MyElement extends LitElement {
 	@property()
@@ -26,51 +22,35 @@ export class MyElement extends LitElement {
 
 	@property()
 	title = '';
-
 	@property()
 	description = 'enter QId or a wikipedia page url';
-
 	@property({ type: Object })
-	thumbnail: WikiImage = { source: '', height: 0, width: 0 };
-
+	thumbnail: WikiImage | undefined = { source: '', height: 0, width: 0 };
+	@property()
+	imgPosition = 'img-left';
 	@property()
 	pageSource = '';
 
-	render() {
-		/*
-			TODO: ask client if they want the styling of wikipedia.
-			${html`${unsafeHTML(this.description)}`}
-		*/
-		return html`
-			<div>
-				<input @change=${(e: any) => (this.searchValue = e.target.value)} />
-				<button @click=${this.fetchWiki} part="button">fetch</button>
-			</div>
+	// defaultRadioValue = this.thumbnail?.source ? 'img-left' : 'no-img';
 
-			<div>
-				<div>
-					<h1>${this.title}</h1>
-					<p>${this.description}</p>
-				</div>
-
-				<div>
-					${this.thumbnail.source
-						? html`
-								<img
-									src="${this.thumbnail.source}"
-									alt="photo of ${this.title}"
-									width="${this.thumbnail.width}"
-									height="${this.thumbnail.height}" />
-						  `
-						: ''}
-				</div>
-
-				${this.pageSource ? html`<p>Read more: <a href="${this.pageSource}">${this.pageSource}</a></p>` : ''}
-			</div>
-
-			<slot></slot>
-		`;
-	}
+	radioGroup = [
+		{
+			id: 'img-left',
+			label: 'on the left',
+		},
+		{
+			id: 'img-right',
+			label: 'on the right',
+		},
+		{
+			id: 'img-bottom',
+			label: 'under text',
+		},
+		{
+			id: 'no-img',
+			label: 'hide image',
+		},
+	];
 
 	private async getWikiByPageIdUrl(url: string, pageId: string) {
 		// Checks if string is a valid wikipedia url.Example https://en.wikipedia.org
@@ -92,7 +72,7 @@ export class MyElement extends LitElement {
 
 	private async getWikiByTitleUrl(url: string) {
 		// Checks if string is a valid wikipedia article url with title. Example: https://en.wikipedia.org/wiki/Universe
-		const urlRegex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org\/wiki\/([a-zA-Z]+_?[a-zA-Z]+)/;
+		const urlRegex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org\/wiki\/([^/]+)/;
 		const [, , , languageCode, title] = url.match(urlRegex) || [];
 
 		if (languageCode === currentLanguage) {
@@ -159,18 +139,83 @@ export class MyElement extends LitElement {
 
 		this.description = summary.extract;
 		this.title = summary.title;
-		this.thumbnail = summary.thumbnail;
+		this.thumbnail = summary?.thumbnail;
 		this.pageSource = summary.content_urls.desktop.page;
+		this.imgPosition = summary.thumbnail ? this.imgPosition : 'no-img';
 	}
 
-	// eslint-disable-next-line @typescript-eslint/member-ordering
-	static styles = css`
-		:host {
-			display: block;
-			padding: 16px;
-			max-width: 800px;
-		}
-	`;
+	private handleInputChange(event: { target: HTMLInputElement }) {
+		this.searchValue = event.target.value;
+	}
+
+	private handleRadioBtnChange(event: { target: HTMLInputElement }) {
+		const position = event.target.value ?? 'no-img';
+
+		this.imgPosition = position;
+	}
+
+	static styles = MyElementStyle;
+
+	private renderImgPositionSetting() {
+		return html`
+			<div>
+				${this.thumbnail?.source
+					? html`
+							<p style="margin-bottom:0">Where should the image be positioned?</p>
+							${this.radioGroup.map(
+								(item) =>
+									html`<input
+											id=${item.id}
+											type="radio"
+											name="img_position"
+											value=${item.id}
+											@change=${this.handleRadioBtnChange}
+											?checked=${this.imgPosition === item.id} />
+										<label for="${item.id}">${item.label}</label><br />`,
+							)}
+					  `
+					: html`<p style="margin-bottom:0">No image availabe</p>`}
+			</div>
+		`;
+	}
+
+	render() {
+		/*
+			TODO: ask client if they want the styling of wikipedia.
+			${html`${unsafeHTML(this.description)}`}
+		*/
+		return html`
+			<div class="wiki-input">
+				<input @change=${this.handleInputChange} />
+				<button @click=${this.fetchWiki} part="button">fetch</button>
+
+				${this.renderImgPositionSetting()}
+			</div>
+
+			<div class="container ${this.imgPosition}">
+				<div class="content">
+					<h1 class="content-title">${this.title}</h1>
+					<p>${this.description}</p>
+				</div>
+
+				${this.thumbnail?.source && this.imgPosition !== 'no-img'
+					? html`
+							<div class="thumbnail">
+								<img
+									src="${this.thumbnail.source}"
+									alt="photo of ${this.title}"
+									width="${this.thumbnail.width}"
+									height="${this.thumbnail.height}" />
+							</div>
+					  `
+					: ''}
+
+				<div class="read-more">
+					${this.pageSource ? html`<p>Read more: <a href="${this.pageSource}">${this.pageSource}</a></p>` : ''}
+				</div>
+			</div>
+		`;
+	}
 }
 
 declare global {

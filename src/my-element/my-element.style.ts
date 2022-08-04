@@ -13,10 +13,16 @@ export const MyElementStyle = css`
 	}
 	.wiki-input {
 		display: grid;
-		grid-template-columns: 1fr auto;
-		grid-column-gap: 2rem;
+		grid-template-columns: 1fr;
+		gap: 1rem 2rem;
 	}
 
+	@media only screen and (min-width: 600px) {
+		.wiki-input {
+			grid-template-columns: 1fr auto;
+			grid-column-gap: 1rem;
+		}
+	}
 	.container {
 		display: grid;
 		grid-template-columns: auto;
@@ -101,7 +107,6 @@ export const MyElementStyle = css`
 
 	.search-input {
 		display: block;
-		width: 100%;
 		padding: 0.375rem 0.75rem;
 		font-size: 1rem;
 		font-weight: 400;

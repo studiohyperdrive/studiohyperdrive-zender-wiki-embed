@@ -63,6 +63,11 @@ export class MyElement extends LitElement {
 	];
 
 	updated(changedProperties: PropertyValues) {
+		// Prevent fetching multiple times.
+		if (!this.isConfigMode && changedProperties.has('isConfigMode')) {
+			this.fetchWiki();
+		}
+
 		if (!changedProperties.has('outputSource') && !changedProperties.has('searchValue')) {
 			this.generateOutputCode();
 		}

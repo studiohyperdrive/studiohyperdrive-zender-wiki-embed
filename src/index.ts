@@ -1,19 +1,27 @@
+const cloneAttributes = (target: Element, source: Element) => {
+	[...source.attributes].forEach((attr) => {
+		target.setAttribute(attr.nodeName, attr.nodeValue ?? '');
+	});
+};
+
 /*
 	To prevent cms problems with custom html tags. Existing html tag will be used with custom data attributes,
 	this script will then convert the 'normal' html tag with a custom one.
 */
-
 const customElementFallback = () => {
-	const targetNodes = document.querySelectorAll('[data-my-wiki-el]');
+	const sourceNodes = document.querySelectorAll('[data-my-wiki-el]');
 
-	targetNodes.forEach((targetNode) => {
-		const componentEl = document.createElement('my-element');
+	sourceNodes.forEach((sourceNode) => {
+		const targetNode = document.createElement('my-element');
 
-		if (targetNode?.parentNode) {
-			targetNode.parentNode.replaceChild(componentEl, targetNode);
+		cloneAttributes(targetNode, sourceNode);
+
+		if (sourceNode?.parentNode) {
+			sourceNode.parentNode.replaceChild(targetNode, sourceNode);
 		}
 	});
 };
 
 customElementFallback();
+
 export {};

@@ -62,4 +62,26 @@ export const MyElementStyle = css`
 			'content'
 			'read-more';
 	}
+
+	.code-block {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		padding: 10px;
+		margin-bottom: 2em;
+		background: #eeeeee;
+		border-radius: 0.3em;
+	}
+
+	.btn-code-copy {
+		border: none;
+
+		width: 3.5em;
+		height: 3.5em;
+	}
+
+	.btn-code-copy:hover {
+		cursor: pointer;
+	}
 `;

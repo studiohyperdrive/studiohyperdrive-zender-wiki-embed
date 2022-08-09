@@ -1,7 +1,12 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { config } from '../config';
-import { LanguageLinkResponse, WikiIdResponse, WikiLanglinksResponse, WikiSummaryResponse } from '../my-element.types';
+import {
+	LanguageLinkResponse,
+	WikiIdResponse,
+	WikiLanglinksResponse,
+	WikiSummaryResponse,
+} from '../my-element/my-element.types';
 
 const cleanupTitle = (rawTitle: string) => {
 	// Replace spaces with underscore.

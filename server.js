@@ -14,7 +14,7 @@ const server = createServer((req, res) => {
 	// // '/folder/to/file/' becomes 'folder/to/file'
 	path = path.replace(/^\/+|\/+$/g, '');
 
-	if (path === 'src/my-element.ts') {
+	if (path === 'src/my-element/my-element.ts') {
 		res.writeHead(200, { 'content-type': 'application/javascript' });
 		createReadStream('dist/zender-wikipedia-embed_web_lit_2022.js').pipe(res);
 		return;

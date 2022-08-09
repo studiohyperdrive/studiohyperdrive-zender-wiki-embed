@@ -92,8 +92,9 @@ export const MyElementStyle = css`
 	}
 
 	.btn-code-copy {
-		align-items: center;
 		display: flex;
+		align-items: center;
+		background-color: transparent;
 
 		border: none;
 
@@ -103,6 +104,11 @@ export const MyElementStyle = css`
 
 	.btn-code-copy:hover {
 		cursor: pointer;
+	}
+
+	.btn-code-copy > img {
+		width: 100%;
+		height: 100%;
 	}
 
 	.search-input {

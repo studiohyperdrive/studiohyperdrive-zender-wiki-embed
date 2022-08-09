@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import '../index';
 import { html, LitElement, PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import '../utils/index';
 import copySvgIcon from '../assets/copy-icon.svg';
 import {
 	getAvailableLangByPageId,
@@ -46,19 +46,19 @@ export class MyElement extends LitElement {
 	radioGroup = [
 		{
 			id: 'img-left',
-			label: 'on the left',
+			label: 'On the left',
 		},
 		{
 			id: 'img-right',
-			label: 'on the right',
+			label: 'On the right',
 		},
 		{
 			id: 'img-bottom',
-			label: 'under text',
+			label: 'Under text',
 		},
 		{
 			id: 'no-img',
-			label: 'hide image',
+			label: 'Hide image',
 		},
 	];
 
@@ -191,7 +191,7 @@ export class MyElement extends LitElement {
 		navigator.clipboard.writeText(this.outputSource);
 
 		this.showCodeCopiedFeedback = true;
-		setTimeout(() => (this.showCodeCopiedFeedback = false), 1000);
+		setTimeout(() => (this.showCodeCopiedFeedback = false), 1500);
 	}
 
 	static styles = MyElementStyle;
@@ -221,6 +221,7 @@ export class MyElement extends LitElement {
 
 	renderCodeBlock() {
 		return html`
+			<h2>Code:</h2>
 			<div class="code-block">
 				<code> ${this.outputSource} </code>
 				${this.showCodeCopiedFeedback ? html`<span>Code copied!</span>` : ''}
@@ -233,10 +234,16 @@ export class MyElement extends LitElement {
 
 	renderConfigMode() {
 		return html`
-			<div class="wiki-input">
-				<input @change=${this.handleInputChange} />
-				<button @click=${this.fetchWiki} part="button">fetch</button>
-				${!this.searchValue ? html`<p>Enter Q-id or a wikipedia page url</p>` : ''} ${this.renderImgPositionSetting()}
+			<div class="wiki-config">
+				<div class="wiki-input">
+					<input
+						class="search-input"
+						placeholder="Enter Q-id or a wikipedia page url"
+						@change=${this.handleInputChange} />
+					<button class="search-btn" @click=${this.fetchWiki} part="button">Show code & preview</button>
+				</div>
+
+				${this.searchValue ? this.renderImgPositionSetting() : ''}
 			</div>
 
 			${this.outputSource ? this.renderCodeBlock() : ''}
@@ -247,6 +254,8 @@ export class MyElement extends LitElement {
 		return html`
 			${this.isConfigMode ? this.renderConfigMode() : ''}
 
+			<!--eslint-disable-next-line prettier/prettier -->
+			${this.title ? html`<h2>Preview:</h2>` : ''}
 			<div class="container ${this.imgPosition}">
 				<div class="content">
 					<h1 class="content-title">${this.title}</h1>
@@ -259,8 +268,7 @@ export class MyElement extends LitElement {
 								<img
 									src="${this.thumbnail.source}"
 									alt="photo of ${this.title}"
-									width="${this.thumbnail.width}"
-									height="${this.thumbnail.height}" />
+									style="max-width: ${this.thumbnail.width}px" />
 							</div>
 					  `
 					: ''}

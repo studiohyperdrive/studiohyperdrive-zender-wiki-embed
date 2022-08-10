@@ -145,6 +145,10 @@ export class MyElement extends LitElement {
 	}
 
 	async fetchWiki() {
+		if (document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
+
 		// Checks if search value is a Q ID. Example: Q44077
 		const searchRegex = /^q[0-9]+$/i;
 

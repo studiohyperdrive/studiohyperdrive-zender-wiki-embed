@@ -11,6 +11,7 @@ import {
 	getSummaryByUrl,
 	getTitlesAndLangsByQid,
 } from '../utils/api';
+import { stringToUrl } from '../utils/helpers';
 import { currentLanguage } from '../utils/language';
 import { MyElementStyle } from './my-element.style';
 import { WikiImage, WikiSummaryResponse } from './my-element.types';
@@ -42,6 +43,8 @@ export class MyElement extends LitElement {
 	imgPosition = 'img-left';
 	@property()
 	pageSource = '';
+	@property()
+	errorMessage = '';
 
 	radioGroup = [
 		{
@@ -62,6 +65,11 @@ export class MyElement extends LitElement {
 		},
 	];
 
+	errors = {
+		invalid: 'Please enter a valid Q-ID or a Wikipedia url.',
+		notSupported: 'Could not find the english version of this Wikipedia article.',
+	};
+
 	updated(changedProperties: PropertyValues) {
 		// Prevent fetching multiple times.
 		if (!this.isConfigMode && changedProperties.has('isConfigMode')) {
@@ -79,13 +87,24 @@ export class MyElement extends LitElement {
 		const [, , , languageCode] = url.match(regex) || [];
 		const infoBypageId = await getAvailableLangByPageId(pageId, languageCode);
 
+		if (!infoBypageId) {
+			this.errorMessage = this.errors.invalid;
+			return;
+		}
+
 		if (languageCode === currentLanguage) {
 			const urlByPageId = getContentUrlByTitle(infoBypageId.title, languageCode);
 
 			return urlByPageId;
 		}
 
-		const langLinkCurrLang = infoBypageId.langlinks.find(({ lang }) => lang === currentLanguage);
+		const langLinkCurrLang = infoBypageId?.langlinks?.find(({ lang }) => lang === currentLanguage);
+
+		if (!langLinkCurrLang) {
+			this.errorMessage = this.errors.notSupported;
+			return;
+		}
+
 		const urlByPageId = getContentUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
 
 		return urlByPageId;
@@ -103,14 +122,33 @@ export class MyElement extends LitElement {
 		}
 
 		const langLinks = await getAvailableLangByTitle(title, languageCode);
+
+		if (!langLinks) {
+			this.errorMessage = this.errors.invalid;
+			return;
+		}
+
 		const langLinkCurrLang = langLinks.find(({ code }) => code === currentLanguage);
+
+		if (!langLinkCurrLang) {
+			this.errorMessage = this.errors.notSupported;
+			return;
+		}
+
 		const wikiUrl = getContentUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
 
 		return wikiUrl;
 	}
 
 	async getWikiByurl(url: string) {
-		const pageId = new URL(url).searchParams.get('curid');
+		const urlObject = stringToUrl(url);
+
+		if (!urlObject) {
+			this.errorMessage = this.errors.invalid;
+			return;
+		}
+
+		const pageId = urlObject.searchParams.get('curid');
 
 		if (pageId) {
 			const summaryUrl = this.getWikiByPageIdUrl(url, pageId);
@@ -127,6 +165,12 @@ export class MyElement extends LitElement {
 		const titlesByLang = await getTitlesAndLangsByQid(wikiId);
 
 		const titleInCurrLang = titlesByLang?.[`${currentLanguage}wiki`] || titlesByLang?.['enwiki'];
+
+		if (!titleInCurrLang) {
+			this.errorMessage = this.errors.notSupported;
+			return;
+		}
+
 		const languageCode = titleInCurrLang.site.slice(0, 2);
 
 		const wikiUrl = getContentUrlByTitle(titleInCurrLang?.title, languageCode);
@@ -144,9 +188,26 @@ export class MyElement extends LitElement {
 		this.outputSource = JSON.stringify(code, null, 2);
 	}
 
+	isInputValid(): boolean {
+		// remove empty spaces
+		this.searchValue = this.searchValue.replace(/ /g, '');
+
+		if (this.searchValue.match(/^\s*$/)) {
+			this.errorMessage = this.errors.invalid;
+			return false;
+		}
+
+		this.errorMessage = '';
+		return true;
+	}
+
 	async fetchWiki() {
 		if (document.activeElement instanceof HTMLElement) {
 			document.activeElement.blur();
+		}
+
+		if (!this.isInputValid()) {
+			return;
 		}
 
 		// Checks if search value is a Q ID. Example: Q44077
@@ -248,17 +309,19 @@ export class MyElement extends LitElement {
 				<div class="wiki-input">
 					<input
 						class="search-input"
-						placeholder="Enter Q-id or a wikipedia page url"
+						placeholder="Enter a Q-ID or a wikipedia page url"
 						tabindex="1"
 						@input=${this.handleInputChange}
 						@keypress=${this.handleInputKeyPress} />
+
 					<button class="search-btn" @click=${this.fetchWiki} part="button" tabindex="2">Show code & preview</button>
 				</div>
-
+				${this.errorMessage ? html`<p class="invalid-input-feedback">${this.errorMessage}</p>` : ''}
+				<!-- eslint-disable-next-line prettier/prettier -->
 				${this.qId ? this.renderImgPositionSetting() : ''}
 			</div>
 
-			${this.outputSource ? this.renderCodeBlock() : ''}
+			${this.qId ? this.renderCodeBlock() : ''}
 		`;
 	}
 

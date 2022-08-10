@@ -40,7 +40,7 @@ export interface Pages {
 export interface PageId {
 	pageid: number;
 	title: string;
-	langlinks: Langlink[];
+	langlinks?: Langlink[];
 }
 
 export interface Langlink {

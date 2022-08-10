@@ -128,6 +128,11 @@ export const MyElementStyle = css`
 		transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 	}
 
+	.invalid-input-feedback {
+		color: #dc3545;
+		margin-top: 0.25rem;
+	}
+
 	/* Bootsrap css */
 	.search-btn {
 		--bs-btn-color: #fff;

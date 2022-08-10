@@ -181,6 +181,12 @@ export class MyElement extends LitElement {
 		this.searchValue = event.target.value;
 	}
 
+	handleInputKeyPress(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			this.fetchWiki();
+		}
+	}
+
 	handleRadioBtnChange(event: { target: HTMLInputElement }) {
 		const position = event.target.value ?? 'no-img';
 
@@ -239,11 +245,13 @@ export class MyElement extends LitElement {
 					<input
 						class="search-input"
 						placeholder="Enter Q-id or a wikipedia page url"
-						@change=${this.handleInputChange} />
-					<button class="search-btn" @click=${this.fetchWiki} part="button">Show code & preview</button>
+						tabindex="1"
+						@input=${this.handleInputChange}
+						@keypress=${this.handleInputKeyPress} />
+					<button class="search-btn" @click=${this.fetchWiki} part="button" tabindex="2">Show code & preview</button>
 				</div>
 
-				${this.searchValue ? this.renderImgPositionSetting() : ''}
+				${this.qId ? this.renderImgPositionSetting() : ''}
 			</div>
 
 			${this.outputSource ? this.renderCodeBlock() : ''}

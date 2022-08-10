@@ -153,9 +153,9 @@ export const MyElementStyle = css`
 		--bs-btn-line-height: 1.5;
 		--bs-btn-border-width: 1px;
 		--bs-btn-border-radius: 0.3rem;
-		--bs-btn-box-shadow: inset 0 1px 0rgba (255, 255, 255, 0.15), 0 1px 1pxrgba (0, 0, 0, 0.075);
+		--bs-btn-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 1px rgba(0, 0, 0, 0.075);
 		--bs-btn-disabled-opacity: 0.65;
-		--bs-btn-focus-box-shadow: 0 0 0 0.25remrgba (var(--bs-btn-focus-shadow-rgb), 0.5);
+		--bs-btn-focus-box-shadow: 0 0 0 0.25rem rgba(var(--bs-btn-focus-shadow-rgb), 0.5);
 		display: inline-block;
 		padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
 		font-family: var(--bs-btn-font-family);
@@ -181,5 +181,13 @@ export const MyElementStyle = css`
 		color: var(--bs-btn-hover-color);
 		background-color: var(--bs-btn-hover-bg);
 		border-color: var(--bs-btn-hover-border-color);
+	}
+
+	.search-btn:focus {
+		color: var(--bs-btn-hover-color);
+		background-color: var(--bs-btn-hover-bg);
+		border-color: var(--bs-btn-hover-border-color);
+		outline: 0;
+		box-shadow: var(--bs-btn-focus-box-shadow);
 	}
 `;

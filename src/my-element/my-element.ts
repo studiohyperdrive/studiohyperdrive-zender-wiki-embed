@@ -167,12 +167,12 @@ export class MyElement extends LitElement {
 	async getWikiByQid(wikiId: string) {
 		const titlesByLang = await getTitlesAndLangsByQid(wikiId);
 
-		let titleInCurrLang = titlesByLang?.[`${currentLanguage}wiki`] || titlesByLang?.['enwiki'];
+		const titleInCurrLang =
+			titlesByLang?.[`${currentLanguage}wiki`] || titlesByLang?.['enwiki'] || Object.values(titlesByLang ?? {})?.[0];
 
 		if (!titleInCurrLang) {
-			titleInCurrLang = Object.values(titlesByLang)[0];
-
-			this.errorMessage = this.errors.notSupported;
+			this.errorMessage = this.errors.invalid;
+			return;
 		}
 
 		const languageCode = titleInCurrLang.site.slice(0, 2);

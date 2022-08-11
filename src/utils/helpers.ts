@@ -23,3 +23,9 @@ export const debounceLeading = (func: () => void, timeout = 300) => {
 		}, timeout);
 	};
 };
+
+export const removeFocus = () => {
+	if (document.activeElement instanceof HTMLElement) {
+		document.activeElement.blur();
+	}
+};

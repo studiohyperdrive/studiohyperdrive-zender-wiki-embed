@@ -3,7 +3,6 @@ import { html, LitElement, PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import '../utils/index';
-import copySvgIcon from '../assets/copy-icon.svg';
 import {
 	getAvailableLangByPageId,
 	getAvailableLangByTitle,
@@ -11,7 +10,7 @@ import {
 	getSummaryByUrl,
 	getTitlesAndLangsByQid,
 } from '../utils/api';
-import { debounceLeading, stringToUrl } from '../utils/helpers';
+import { debounceLeading, removeFocus, stringToUrl } from '../utils/helpers';
 import { currentLanguage } from '../utils/language';
 import { MyElementStyle } from './my-element.style';
 import { WikiImage, WikiSummaryResponse } from './my-element.types';
@@ -199,9 +198,7 @@ export class MyElement extends LitElement {
 	}
 
 	async fetchWiki() {
-		if (document.activeElement instanceof HTMLElement) {
-			document.activeElement.blur();
-		}
+		removeFocus();
 
 		if (!this.isInputValid()) {
 			return;
@@ -268,6 +265,8 @@ export class MyElement extends LitElement {
 	}
 
 	copyCodeToclipboard() {
+		removeFocus();
+
 		navigator.clipboard.writeText(this.outputSource);
 
 		this.showCodeCopiedFeedback = true;
@@ -307,9 +306,7 @@ export class MyElement extends LitElement {
 			<div class="code-block">
 				<code> ${this.outputSource} </code>
 				${this.showCodeCopiedFeedback ? html`<span>Code copied!</span>` : ''}
-				<button class="btn-code-copy" @click=${this.copyCodeToclipboard}>
-					<img src="${copySvgIcon}" title="copy code" />
-				</button>
+				<button class="btn btn-code-copy" @click=${this.copyCodeToclipboard}>Copy code</button>
 			</div>
 		`;
 	}
@@ -319,13 +316,13 @@ export class MyElement extends LitElement {
 			<div class="wiki-config">
 				<div class="wiki-input">
 					<input
-						class="search-input"
+						class=" search-input"
 						placeholder="Enter a Q-ID or a wikipedia page url"
 						tabindex="1"
 						@input=${this.handleInputChange}
 						@keypress=${this.handleInputKeyPress} />
 
-					<button class="search-btn" @click=${this.debouncedFetchWiki} part="button" tabindex="2">
+					<button class="btn search-btn" @click=${this.debouncedFetchWiki} part="button" tabindex="2">
 						Show code & preview
 					</button>
 				</div>

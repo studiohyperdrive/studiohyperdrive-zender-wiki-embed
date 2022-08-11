@@ -11,7 +11,7 @@ import {
 	getSummaryByUrl,
 	getTitlesAndLangsByQid,
 } from '../utils/api';
-import { stringToUrl } from '../utils/helpers';
+import { debounceLeading, stringToUrl } from '../utils/helpers';
 import { currentLanguage } from '../utils/language';
 import { MyElementStyle } from './my-element.style';
 import { WikiImage, WikiSummaryResponse } from './my-element.types';
@@ -244,13 +244,15 @@ export class MyElement extends LitElement {
 		this.imgPosition = summary.thumbnail ? this.imgPosition : 'no-img';
 	}
 
+	debouncedFetchWiki = debounceLeading(() => this.fetchWiki());
+
 	handleInputChange(event: { target: HTMLInputElement }) {
 		this.searchValue = event.target.value;
 	}
 
 	handleInputKeyPress(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
-			this.fetchWiki();
+			this.debouncedFetchWiki();
 		}
 	}
 
@@ -316,7 +318,9 @@ export class MyElement extends LitElement {
 						@input=${this.handleInputChange}
 						@keypress=${this.handleInputKeyPress} />
 
-					<button class="search-btn" @click=${this.fetchWiki} part="button" tabindex="2">Show code & preview</button>
+					<button class="search-btn" @click=${this.debouncedFetchWiki} part="button" tabindex="2">
+						Show code & preview
+					</button>
 				</div>
 				${this.errorMessage ? html`<p class="invalid-input-feedback">${this.errorMessage}</p>` : ''}
 				<!-- eslint-disable-next-line prettier/prettier -->

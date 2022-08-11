@@ -54,7 +54,7 @@ export const getTitlesAndLangsByQid = async (wikiId: string) => {
 	return titlesByLang;
 };
 
-export const getSummaryByUrl = async (url: string) => {
+export const getSummaryByUrl = async (url: string | undefined) => {
 	if (!url) {
 		return null;
 	}

@@ -9,3 +9,17 @@ export const stringToUrl = (urlInStringFormat: string): URL | null => {
 		return null;
 	}
 };
+
+export const debounceLeading = (func: () => void, timeout = 300) => {
+	let timer: number | undefined;
+
+	return (...args) => {
+		if (!timer) {
+			func.apply(this, args);
+		}
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			timer = undefined;
+		}, timeout);
+	};
+};

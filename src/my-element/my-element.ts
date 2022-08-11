@@ -12,6 +12,7 @@ import {
 } from '../utils/api';
 import { debounceLeading, removeFocus, stringToUrl } from '../utils/helpers';
 import { currentLanguage } from '../utils/language';
+import { ConfigModeStyle } from './config-mode.style';
 import { MyElementStyle } from './my-element.style';
 import { WikiImage, WikiSummaryResponse } from './my-element.types';
 
@@ -277,7 +278,7 @@ export class MyElement extends LitElement {
 	//#endregion UTILS
 
 	//#region RENDER
-	static styles = MyElementStyle;
+	static styles = [MyElementStyle, ConfigModeStyle];
 
 	renderImgPositionSetting() {
 		return html`
@@ -318,7 +319,7 @@ export class MyElement extends LitElement {
 			<div class="wiki-config">
 				<div class="wiki-input">
 					<input
-						class=" search-input"
+						class="search-input"
 						placeholder="Enter a Q-ID or a wikipedia page url"
 						tabindex="1"
 						@input=${this.handleInputChange}

@@ -10,10 +10,11 @@ export const stringToUrl = (urlInStringFormat: string): URL | null => {
 	}
 };
 
+// credit: https://www.freecodecamp.org/news/javascript-debounce-example
 export const debounceLeading = (func: () => void, timeout = 300) => {
 	let timer: number | undefined;
 
-	return (...args) => {
+	return (...args: never) => {
 		if (!timer) {
 			func.apply(this, args);
 		}

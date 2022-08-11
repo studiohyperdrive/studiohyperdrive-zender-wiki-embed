@@ -11,7 +11,6 @@ export default defineConfig({
 
 		rollupOptions: {
 			// external: /^lit/,
-			external: [new RegExp('/src/my-element/config-mode.style.ts')],
 		},
 	},
 	esbuild: {

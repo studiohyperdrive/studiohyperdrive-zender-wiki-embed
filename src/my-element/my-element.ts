@@ -65,6 +65,8 @@ export class MyElement extends LitElement {
 		},
 	];
 
+	readMoreLabel = currentLanguage === 'nl' ? 'Lees meer' : 'Read more';
+
 	errors = {
 		invalid: 'Please enter a valid Q-ID or a Wikipedia url.',
 		notSupported: 'Could not find the english version of this Wikipedia article.',
@@ -359,7 +361,9 @@ export class MyElement extends LitElement {
 					: ''}
 
 				<div class="read-more">
-					${this.pageSource ? html`<p>Read more: <a href="${this.pageSource}">${this.pageSource}</a></p>` : ''}
+					${this.pageSource
+						? html`<p>${this.readMoreLabel}: <a href="${this.pageSource}">${this.pageSource}</a></p>`
+						: ''}
 				</div>
 			</div>
 		`;

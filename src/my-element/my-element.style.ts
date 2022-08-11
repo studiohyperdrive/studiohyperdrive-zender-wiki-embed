@@ -85,7 +85,7 @@ export const MyElementStyle = css`
 		justify-content: space-between;
 		align-items: center;
 
-		padding: 0.625rem;
+		padding: 0.75rem;
 		margin-bottom: 2rem;
 		background: #eeeeee;
 		border-radius: 0.3rem;
@@ -193,7 +193,6 @@ export const MyElementStyle = css`
 		--bs-gradient: none;
 
 		--bs-btn-padding-x: 0.5rem;
-		--bs-btn-padding-y: 0.325rem;
 		--bs-btn-font-size: 0.85rem;
 		--bs-btn-line-height: 1;
 	}

@@ -12,7 +12,6 @@ import {
 } from '../utils/api';
 import { debounceLeading, removeFocus, stringToUrl } from '../utils/helpers';
 import { currentLanguage } from '../utils/language';
-import { ConfigModeStyle } from './config-mode.style';
 import { MyElementStyle } from './my-element.style';
 import { WikiImage, WikiSummaryResponse } from './my-element.types';
 
@@ -278,7 +277,7 @@ export class MyElement extends LitElement {
 	//#endregion UTILS
 
 	//#region RENDER
-	static styles = [MyElementStyle, ConfigModeStyle];
+	static styles = MyElementStyle;
 
 	renderImgPositionSetting() {
 		return html`

@@ -18,6 +18,7 @@ import { WikiImage, WikiSummaryResponse } from './my-element.types';
 
 @customElement('my-element')
 export class MyElement extends LitElement {
+	//#region VARIABLES
 	@property({
 		type: Boolean,
 	})
@@ -69,7 +70,9 @@ export class MyElement extends LitElement {
 		invalid: 'Please enter a valid Q-ID or a Wikipedia url.',
 		notSupported: 'Could not find the english version of this Wikipedia article.',
 	};
+	//#endregion VARIABLES
 
+	//#region LIFECYCLE METHODS
 	updated(changedProperties: PropertyValues) {
 		// Prevent fetching multiple times.
 		if (!this.isConfigMode && changedProperties.has('isConfigMode')) {
@@ -80,8 +83,10 @@ export class MyElement extends LitElement {
 			this.generateOutputCode();
 		}
 	}
+	//#endregion LIFECYCLE METHODS
 
-	private async getWikiByPageIdUrl(url: string, pageId: string) {
+	//#region UTILS
+	async getWikiByPageIdUrl(url: string, pageId: string) {
 		// Checks if string is a valid wikipedia url.Example https://en.wikipedia.org
 		const regex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org/i;
 		const [, , , languageCode] = url.match(regex) || [];
@@ -180,16 +185,6 @@ export class MyElement extends LitElement {
 		return wikiUrl;
 	}
 
-	generateOutputCode() {
-		const code = {
-			'data-my-wiki-el': '',
-			searchvalue: this.qId,
-			imgposition: this.imgPosition,
-		};
-
-		this.outputSource = JSON.stringify(code, null, 2);
-	}
-
 	isInputValid(): boolean {
 		// remove empty spaces
 		this.searchValue = this.searchValue.replace(/ /g, '');
@@ -262,13 +257,25 @@ export class MyElement extends LitElement {
 		this.imgPosition = position;
 	}
 
+	generateOutputCode() {
+		const code = {
+			'data-my-wiki-el': '',
+			searchvalue: this.qId,
+			imgposition: this.imgPosition,
+		};
+
+		this.outputSource = JSON.stringify(code, null, 2);
+	}
+
 	copyCodeToclipboard() {
 		navigator.clipboard.writeText(this.outputSource);
 
 		this.showCodeCopiedFeedback = true;
 		setTimeout(() => (this.showCodeCopiedFeedback = false), 1500);
 	}
+	//#endregion UTILS
 
+	//#region RENDER
 	static styles = MyElementStyle;
 
 	renderImgPositionSetting() {
@@ -360,6 +367,7 @@ export class MyElement extends LitElement {
 			</div>
 		`;
 	}
+	//#endregion RENDER
 }
 
 declare global {

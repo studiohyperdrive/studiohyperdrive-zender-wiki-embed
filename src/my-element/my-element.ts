@@ -100,12 +100,13 @@ export class MyElement extends LitElement {
 
 		const langLinkCurrLang = infoBypageId?.langlinks?.find(({ lang }) => lang === currentLanguage);
 
+		let urlByPageId;
 		if (!langLinkCurrLang) {
 			this.errorMessage = this.errors.notSupported;
-			return;
+			urlByPageId = getContentUrlByTitle(infoBypageId.title, languageCode);
+		} else {
+			urlByPageId = getContentUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
 		}
-
-		const urlByPageId = getContentUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
 
 		return urlByPageId;
 	}
@@ -130,12 +131,14 @@ export class MyElement extends LitElement {
 
 		const langLinkCurrLang = langLinks.find(({ code }) => code === currentLanguage);
 
+		let wikiUrl;
 		if (!langLinkCurrLang) {
-			this.errorMessage = this.errors.notSupported;
-			return;
-		}
+			wikiUrl = getContentUrlByTitle(title, languageCode);
 
-		const wikiUrl = getContentUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
+			this.errorMessage = this.errors.notSupported;
+		} else {
+			wikiUrl = getContentUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
+		}
 
 		return wikiUrl;
 	}
@@ -164,17 +167,16 @@ export class MyElement extends LitElement {
 	async getWikiByQid(wikiId: string) {
 		const titlesByLang = await getTitlesAndLangsByQid(wikiId);
 
-		const titleInCurrLang = titlesByLang?.[`${currentLanguage}wiki`] || titlesByLang?.['enwiki'];
+		let titleInCurrLang = titlesByLang?.[`${currentLanguage}wiki`] || titlesByLang?.['enwiki'];
 
 		if (!titleInCurrLang) {
+			titleInCurrLang = Object.values(titlesByLang)[0];
+
 			this.errorMessage = this.errors.notSupported;
-			return;
 		}
 
 		const languageCode = titleInCurrLang.site.slice(0, 2);
-
 		const wikiUrl = getContentUrlByTitle(titleInCurrLang?.title, languageCode);
-
 		return wikiUrl;
 	}
 

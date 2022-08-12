@@ -145,6 +145,10 @@ export class MyElement extends LitElement {
 	}
 
 	async fetchWiki() {
+		if (document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
+
 		// Checks if search value is a Q ID. Example: Q44077
 		const searchRegex = /^q[0-9]+$/i;
 
@@ -179,6 +183,12 @@ export class MyElement extends LitElement {
 
 	handleInputChange(event: { target: HTMLInputElement }) {
 		this.searchValue = event.target.value;
+	}
+
+	handleInputKeyPress(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			this.fetchWiki();
+		}
 	}
 
 	handleRadioBtnChange(event: { target: HTMLInputElement }) {
@@ -239,11 +249,13 @@ export class MyElement extends LitElement {
 					<input
 						class="search-input"
 						placeholder="Enter Q-id or a wikipedia page url"
-						@change=${this.handleInputChange} />
-					<button class="search-btn" @click=${this.fetchWiki} part="button">Show code & preview</button>
+						tabindex="1"
+						@input=${this.handleInputChange}
+						@keypress=${this.handleInputKeyPress} />
+					<button class="search-btn" @click=${this.fetchWiki} part="button" tabindex="2">Show code & preview</button>
 				</div>
 
-				${this.searchValue ? this.renderImgPositionSetting() : ''}
+				${this.qId ? this.renderImgPositionSetting() : ''}
 			</div>
 
 			${this.outputSource ? this.renderCodeBlock() : ''}

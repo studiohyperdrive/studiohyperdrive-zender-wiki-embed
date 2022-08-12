@@ -11,7 +11,7 @@ const port = parseInt(process.env.PORT, 10) || 3000;
 
 const server = createServer((req, res) => {
 	let path = url.parse(req.url, true).pathname;
-	// // '/folder/to/file/' becomes 'folder/to/file'
+	// '/folder/to/file/' becomes 'folder/to/file'
 	path = path.replace(/^\/+|\/+$/g, '');
 
 	if (path === 'src/my-element/my-element.ts') {

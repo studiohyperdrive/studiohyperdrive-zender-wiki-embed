@@ -1858,7 +1858,7 @@ let y = class extends G {
       searchvalue: this.qId,
       imgposition: this.imgPosition
     };
-    this.outputSource = JSON.stringify(r, null, 2);
+    this.outputSource = `'${JSON.stringify(r, null, 2)}'`;
   }
   copyCodeToclipboard() {
     Ut(), navigator.clipboard.writeText(this.outputSource), this.showCodeCopiedFeedback = !0, setTimeout(() => this.showCodeCopiedFeedback = !1, 1500);
@@ -1922,7 +1922,7 @@ let y = class extends G {
 			${this.isConfigMode ? this.renderConfigMode() : ""}
 
 			<!--eslint-disable-next-line prettier/prettier -->
-			${this.title ? w`<h2>Preview:</h2>` : ""}
+			${this.title && this.isConfigMode ? w`<h2>Preview:</h2>` : ""}
 			<div class="container ${this.imgPosition}">
 				<div class="content">
 					<h1 class="content-title">${this.title}</h1>

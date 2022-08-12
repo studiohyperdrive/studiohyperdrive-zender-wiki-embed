@@ -16,7 +16,7 @@ const server = createServer((req, res) => {
 
 	if (path === 'src/my-element/my-element.ts') {
 		res.writeHead(200, { 'content-type': 'application/javascript' });
-		createReadStream('dist/zender-wikipedia-embed_web_lit_2022.js').pipe(res);
+		createReadStream('dist/zender-wiki-embed.js').pipe(res);
 		return;
 	}
 

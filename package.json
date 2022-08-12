@@ -3,9 +3,9 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "main": "dist/my-element.es.js",
+  "main": "dist/zender-wiki-embed.js",
   "exports": {
-    ".": "./dist/my-element.es.js"
+    ".": "./dist/zender-wiki-embed.js"
   },
   "types": "types/my-element.d.ts",
   "files": [

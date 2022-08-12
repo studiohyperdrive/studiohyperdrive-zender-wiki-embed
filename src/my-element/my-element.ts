@@ -3,7 +3,6 @@ import { html, LitElement, PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import '../utils/index';
-import copySvgIcon from '../assets/copy-icon.svg';
 import {
 	getAvailableLangByPageId,
 	getAvailableLangByTitle,
@@ -11,13 +10,14 @@ import {
 	getSummaryByUrl,
 	getTitlesAndLangsByQid,
 } from '../utils/api';
-import { stringToUrl } from '../utils/helpers';
+import { debounceLeading, removeFocus, stringToUrl } from '../utils/helpers';
 import { currentLanguage } from '../utils/language';
 import { MyElementStyle } from './my-element.style';
 import { WikiImage, WikiSummaryResponse } from './my-element.types';
 
 @customElement('my-element')
 export class MyElement extends LitElement {
+	//#region VARIABLES
 	@property({
 		type: Boolean,
 	})
@@ -65,11 +65,15 @@ export class MyElement extends LitElement {
 		},
 	];
 
+	readMoreLabel = currentLanguage === 'nl' ? 'Lees meer' : 'Read more';
+
 	errors = {
 		invalid: 'Please enter a valid Q-ID or a Wikipedia url.',
 		notSupported: 'Could not find the english version of this Wikipedia article.',
 	};
+	//#endregion VARIABLES
 
+	//#region LIFECYCLE METHODS
 	updated(changedProperties: PropertyValues) {
 		// Prevent fetching multiple times.
 		if (!this.isConfigMode && changedProperties.has('isConfigMode')) {
@@ -80,8 +84,10 @@ export class MyElement extends LitElement {
 			this.generateOutputCode();
 		}
 	}
+	//#endregion LIFECYCLE METHODS
 
-	private async getWikiByPageIdUrl(url: string, pageId: string) {
+	//#region UTILS
+	async getWikiByPageIdUrl(url: string, pageId: string) {
 		// Checks if string is a valid wikipedia url.Example https://en.wikipedia.org
 		const regex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org/i;
 		const [, , , languageCode] = url.match(regex) || [];
@@ -180,16 +186,6 @@ export class MyElement extends LitElement {
 		return wikiUrl;
 	}
 
-	generateOutputCode() {
-		const code = {
-			'data-my-wiki-el': '',
-			searchvalue: this.qId,
-			imgposition: this.imgPosition,
-		};
-
-		this.outputSource = JSON.stringify(code, null, 2);
-	}
-
 	isInputValid(): boolean {
 		// remove empty spaces
 		this.searchValue = this.searchValue.replace(/ /g, '');
@@ -204,9 +200,7 @@ export class MyElement extends LitElement {
 	}
 
 	async fetchWiki() {
-		if (document.activeElement instanceof HTMLElement) {
-			document.activeElement.blur();
-		}
+		removeFocus();
 
 		if (!this.isInputValid()) {
 			return;
@@ -244,13 +238,15 @@ export class MyElement extends LitElement {
 		this.imgPosition = summary.thumbnail ? this.imgPosition : 'no-img';
 	}
 
+	debouncedFetchWiki = debounceLeading(() => this.fetchWiki());
+
 	handleInputChange(event: { target: HTMLInputElement }) {
 		this.searchValue = event.target.value;
 	}
 
 	handleInputKeyPress(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
-			this.fetchWiki();
+			this.debouncedFetchWiki();
 		}
 	}
 
@@ -260,13 +256,27 @@ export class MyElement extends LitElement {
 		this.imgPosition = position;
 	}
 
+	generateOutputCode() {
+		const code = {
+			'data-my-wiki-el': '',
+			searchvalue: this.qId,
+			imgposition: this.imgPosition,
+		};
+
+		this.outputSource = JSON.stringify(code, null, 2);
+	}
+
 	copyCodeToclipboard() {
+		removeFocus();
+
 		navigator.clipboard.writeText(this.outputSource);
 
 		this.showCodeCopiedFeedback = true;
 		setTimeout(() => (this.showCodeCopiedFeedback = false), 1500);
 	}
+	//#endregion UTILS
 
+	//#region RENDER
 	static styles = MyElementStyle;
 
 	renderImgPositionSetting() {
@@ -298,9 +308,7 @@ export class MyElement extends LitElement {
 			<div class="code-block">
 				<code> ${this.outputSource} </code>
 				${this.showCodeCopiedFeedback ? html`<span>Code copied!</span>` : ''}
-				<button class="btn-code-copy" @click=${this.copyCodeToclipboard}>
-					<img src="${copySvgIcon}" title="copy code" />
-				</button>
+				<button class="btn btn-code-copy" @click=${this.copyCodeToclipboard}>Copy code</button>
 			</div>
 		`;
 	}
@@ -316,7 +324,9 @@ export class MyElement extends LitElement {
 						@input=${this.handleInputChange}
 						@keypress=${this.handleInputKeyPress} />
 
-					<button class="search-btn" @click=${this.fetchWiki} part="button" tabindex="2">Show code & preview</button>
+					<button class="btn search-btn" @click=${this.debouncedFetchWiki} part="button" tabindex="2">
+						Show code & preview
+					</button>
 				</div>
 				${this.errorMessage ? html`<p class="invalid-input-feedback">${this.errorMessage}</p>` : ''}
 				<!-- eslint-disable-next-line prettier/prettier -->
@@ -351,11 +361,14 @@ export class MyElement extends LitElement {
 					: ''}
 
 				<div class="read-more">
-					${this.pageSource ? html`<p>Read more: <a href="${this.pageSource}">${this.pageSource}</a></p>` : ''}
+					${this.pageSource
+						? html`<p>${this.readMoreLabel}: <a href="${this.pageSource}">${this.pageSource}</a></p>`
+						: ''}
 				</div>
 			</div>
 		`;
 	}
+	//#endregion RENDER
 }
 
 declare global {

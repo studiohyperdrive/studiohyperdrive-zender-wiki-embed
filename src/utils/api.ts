@@ -24,11 +24,11 @@ export const getContentUrlByTitle = (rawTitle?: string, languageCode?: string) =
 };
 
 export const getAvailableLangByPageId = async (pageId: string, languageCode: string) => {
-	const fetchLangLinks: AxiosResponse<WikiLanglinksResponse> = await axios.get(
-		`${config.wikiActionApiUrl(languageCode)}&prop=langlinks&pageids=${pageId}`,
-	);
+	const fetchLangLinks: AxiosResponse<WikiLanglinksResponse> | null = await axios
+		.get(`${config.wikiActionApiUrl(languageCode)}&prop=langlinks&pageids=${pageId}`)
+		.catch(() => null);
 
-	return fetchLangLinks.data.query.pages?.[pageId];
+	return fetchLangLinks?.data?.query?.pages?.[pageId];
 };
 
 export const getAvailableLangByTitle = async (rawTitle: string, languageCode: string) => {
@@ -38,11 +38,11 @@ export const getAvailableLangByTitle = async (rawTitle: string, languageCode: st
 
 	const title = cleanupTitle(rawTitle);
 
-	const fetchLangLinks: AxiosResponse<LanguageLinkResponse[]> = await axios.get(
-		`${config.wikiRestApiUrl2(languageCode)}/${title}/links/language`,
-	);
+	const fetchLangLinks: AxiosResponse<LanguageLinkResponse[]> | null = await axios
+		.get(`${config.wikiRestApiUrl2(languageCode)}/${title}/links/language`)
+		.catch(() => null);
 
-	return fetchLangLinks.data;
+	return fetchLangLinks?.data;
 };
 
 export const getTitlesAndLangsByQid = async (wikiId: string) => {
@@ -54,7 +54,7 @@ export const getTitlesAndLangsByQid = async (wikiId: string) => {
 	return titlesByLang;
 };
 
-export const getSummaryByUrl = async (url: string) => {
+export const getSummaryByUrl = async (url: string | undefined) => {
 	if (!url) {
 		return null;
 	}

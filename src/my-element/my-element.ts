@@ -263,7 +263,7 @@ export class MyElement extends LitElement {
 			imgposition: this.imgPosition,
 		};
 
-		this.outputSource = JSON.stringify(code, null, 2);
+		this.outputSource = `'${JSON.stringify(code, null, 2)}'`;
 	}
 
 	copyCodeToclipboard() {
@@ -342,7 +342,7 @@ export class MyElement extends LitElement {
 			${this.isConfigMode ? this.renderConfigMode() : ''}
 
 			<!--eslint-disable-next-line prettier/prettier -->
-			${this.title ? html`<h2>Preview:</h2>` : ''}
+			${this.title && this.isConfigMode ? html`<h2>Preview:</h2>` : ''}
 			<div class="container ${this.imgPosition}">
 				<div class="content">
 					<h1 class="content-title">${this.title}</h1>

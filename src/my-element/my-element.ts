@@ -335,31 +335,33 @@ export class MyElement extends LitElement {
 
 	render() {
 		return html`
-			${this.isConfigMode ? this.renderConfigMode() : ''}
+			<div class="${this.isConfigMode ? 'container' : ''}">
+				${this.isConfigMode ? this.renderConfigMode() : ''}
 
-			<!--eslint-disable-next-line prettier/prettier -->
-			${this.title && this.isConfigMode ? html`<h2>${this.content.preview.title}:</h2>` : ''}
-			<div class="container ${this.imgPosition}">
-				<div class="content">
-					<h1 class="content-title">${this.title}</h1>
-					<p>${this.description}</p>
-				</div>
+				<!--eslint-disable-next-line prettier/prettier -->
+				${this.title && this.isConfigMode ? html`<h2>${this.content.preview.title}:</h2>` : ''}
+				<div class="content-container ${this.imgPosition}">
+					<div class="content">
+						<h1 class="content-title">${this.title}</h1>
+						<p>${this.description}</p>
+					</div>
 
-				${this.thumbnail?.source && this.imgPosition !== 'no-img'
-					? html`
-							<div class="thumbnail">
-								<img
-									src="${this.thumbnail.source}"
-									alt="photo of ${this.title}"
-									style="max-width: ${this.thumbnail.width}px" />
-							</div>
-					  `
-					: ''}
-
-				<div class="read-more">
-					${this.pageSource
-						? html`<p>${this.content.preview.readMore}: <a href="${this.pageSource}">${this.pageSource}</a></p>`
+					${this.thumbnail?.source && this.imgPosition !== 'no-img'
+						? html`
+								<div class="thumbnail">
+									<img
+										src="${this.thumbnail.source}"
+										alt="photo of ${this.title}"
+										style="max-width: ${this.thumbnail.width}px" />
+								</div>
+						  `
 						: ''}
+
+					<div class="read-more">
+						${this.pageSource
+							? html`<p>${this.content.preview.readMore}: <a href="${this.pageSource}">${this.pageSource}</a></p>`
+							: ''}
+					</div>
 				</div>
 			</div>
 		`;

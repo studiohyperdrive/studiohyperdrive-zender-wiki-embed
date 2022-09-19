@@ -3,8 +3,11 @@ import { css } from 'lit';
 export const MyElementStyle = css`
 	:host {
 		display: block;
-		max-width: 50rem;
 		padding: 1rem;
+	}
+
+	.container {
+		max-width: 50rem;
 		margin: 0 auto;
 	}
 
@@ -23,9 +26,9 @@ export const MyElementStyle = css`
 			grid-column-gap: 1rem;
 		}
 	}
-	.container {
+	.content-container {
 		display: grid;
-		grid-template-columns: auto;
+		grid-template-columns: minmax(min-content, max-content) auto;
 		grid-template-rows: auto;
 		grid-column-gap: 1rem;
 		grid-row-gap: 1rem;

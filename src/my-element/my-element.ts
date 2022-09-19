@@ -11,7 +11,7 @@ import {
 	getTitlesAndLangsByQid,
 } from '../utils/api';
 import { debounceLeading, removeFocus, stringToUrl } from '../utils/helpers';
-import { currentLanguage } from '../utils/language';
+import { currentLanguage, translatedContent } from '../utils/language';
 import { MyElementStyle } from './my-element.style';
 import { WikiImage, WikiSummaryResponse } from './my-element.types';
 
@@ -46,31 +46,27 @@ export class MyElement extends LitElement {
 	@property()
 	errorMessage = '';
 
+	content = currentLanguage === 'nl' ? translatedContent.nl : translatedContent.en;
+
 	radioGroup = [
 		{
 			id: 'img-left',
-			label: 'On the left',
+			label: this.content.imgPosition.optionLeft,
 		},
 		{
 			id: 'img-right',
-			label: 'On the right',
+			label: this.content.imgPosition.optionRight,
 		},
 		{
 			id: 'img-bottom',
-			label: 'Under text',
+			label: this.content.imgPosition.optionBottom,
 		},
 		{
 			id: 'no-img',
-			label: 'Hide image',
+			label: this.content.imgPosition.optionNoImg,
 		},
 	];
 
-	readMoreLabel = currentLanguage === 'nl' ? 'Lees meer' : 'Read more';
-
-	errors = {
-		invalid: 'Please enter a valid Q-ID or a Wikipedia url.',
-		notSupported: 'Could not find the english version of this Wikipedia article.',
-	};
 	//#endregion VARIABLES
 
 	//#region LIFECYCLE METHODS
@@ -94,7 +90,7 @@ export class MyElement extends LitElement {
 		const infoBypageId = await getAvailableLangByPageId(pageId, languageCode);
 
 		if (!infoBypageId) {
-			this.errorMessage = this.errors.invalid;
+			this.errorMessage = this.content.errors.invalid;
 			return;
 		}
 
@@ -108,7 +104,7 @@ export class MyElement extends LitElement {
 
 		let urlByPageId;
 		if (!langLinkCurrLang) {
-			this.errorMessage = this.errors.notSupported;
+			this.errorMessage = this.content.errors.notSupported;
 			urlByPageId = getContentUrlByTitle(infoBypageId.title, languageCode);
 		} else {
 			urlByPageId = getContentUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
@@ -131,7 +127,7 @@ export class MyElement extends LitElement {
 		const langLinks = await getAvailableLangByTitle(title, languageCode);
 
 		if (!langLinks) {
-			this.errorMessage = this.errors.invalid;
+			this.errorMessage = this.content.errors.invalid;
 			return;
 		}
 
@@ -141,7 +137,7 @@ export class MyElement extends LitElement {
 		if (!langLinkCurrLang) {
 			wikiUrl = getContentUrlByTitle(title, languageCode);
 
-			this.errorMessage = this.errors.notSupported;
+			this.errorMessage = this.content.errors.notSupported;
 		} else {
 			wikiUrl = getContentUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
 		}
@@ -153,7 +149,7 @@ export class MyElement extends LitElement {
 		const urlObject = stringToUrl(url);
 
 		if (!urlObject) {
-			this.errorMessage = this.errors.invalid;
+			this.errorMessage = this.content.errors.invalid;
 			return;
 		}
 
@@ -177,7 +173,7 @@ export class MyElement extends LitElement {
 			titlesByLang?.[`${currentLanguage}wiki`] || titlesByLang?.['enwiki'] || Object.values(titlesByLang ?? {})?.[0];
 
 		if (!titleInCurrLang) {
-			this.errorMessage = this.errors.invalid;
+			this.errorMessage = this.content.errors.invalid;
 			return;
 		}
 
@@ -191,7 +187,7 @@ export class MyElement extends LitElement {
 		this.searchValue = this.searchValue.replace(/ /g, '');
 
 		if (this.searchValue.match(/^\s*$/)) {
-			this.errorMessage = this.errors.invalid;
+			this.errorMessage = this.content.errors.invalid;
 			return false;
 		}
 
@@ -284,7 +280,7 @@ export class MyElement extends LitElement {
 			<div>
 				${this.thumbnail?.source
 					? html`
-							<p style="margin-bottom:0">Where should the image be positioned?</p>
+							<p style="margin-bottom:0">${this.content.imgPosition.title}</p>
 							${this.radioGroup.map(
 								(item) =>
 									html`<input
@@ -297,18 +293,18 @@ export class MyElement extends LitElement {
 										<label for="${item.id}">${item.label}</label><br />`,
 							)}
 					  `
-					: html`<p style="margin-bottom:0">No image availabe</p>`}
+					: html`<p style="margin-bottom:0">${this.content.imgPosition.noImgAvailable}</p>`}
 			</div>
 		`;
 	}
 
 	renderCodeBlock() {
 		return html`
-			<h2>Code:</h2>
+			<h2>${this.content.code.title}:</h2>
 			<div class="code-block">
 				<code> ${this.outputSource} </code>
-				${this.showCodeCopiedFeedback ? html`<span>Code copied!</span>` : ''}
-				<button class="btn btn-code-copy" @click=${this.copyCodeToclipboard}>Copy code</button>
+				${this.showCodeCopiedFeedback ? html`<span>${this.content.code.btnClickFeedback}</span>` : ''}
+				<button class="btn btn-code-copy" @click=${this.copyCodeToclipboard}>${this.content.code.btnText}</button>
 			</div>
 		`;
 	}
@@ -319,13 +315,13 @@ export class MyElement extends LitElement {
 				<div class="wiki-input">
 					<input
 						class="search-input"
-						placeholder="Enter a Q-ID or a wikipedia page url"
+						placeholder="${this.content.search.inputPlaceholder}"
 						tabindex="1"
 						@input=${this.handleInputChange}
 						@keypress=${this.handleInputKeyPress} />
 
 					<button class="btn search-btn" @click=${this.debouncedFetchWiki} part="button" tabindex="2">
-						Show code & preview
+						${this.content.search.btnText}
 					</button>
 				</div>
 				${this.errorMessage ? html`<p class="invalid-input-feedback">${this.errorMessage}</p>` : ''}
@@ -342,7 +338,7 @@ export class MyElement extends LitElement {
 			${this.isConfigMode ? this.renderConfigMode() : ''}
 
 			<!--eslint-disable-next-line prettier/prettier -->
-			${this.title && this.isConfigMode ? html`<h2>Preview:</h2>` : ''}
+			${this.title && this.isConfigMode ? html`<h2>${this.content.preview.title}:</h2>` : ''}
 			<div class="container ${this.imgPosition}">
 				<div class="content">
 					<h1 class="content-title">${this.title}</h1>
@@ -362,7 +358,7 @@ export class MyElement extends LitElement {
 
 				<div class="read-more">
 					${this.pageSource
-						? html`<p>${this.readMoreLabel}: <a href="${this.pageSource}">${this.pageSource}</a></p>`
+						? html`<p>${this.content.preview.readMore}: <a href="${this.pageSource}">${this.pageSource}</a></p>`
 						: ''}
 				</div>
 			</div>

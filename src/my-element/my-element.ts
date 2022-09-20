@@ -31,7 +31,13 @@ export class MyElement extends LitElement {
 	@property()
 	outputSource = '';
 	@property({ type: Boolean })
+	isSourceInJson = true;
+	@property({ type: Boolean })
 	showCodeCopiedFeedback = false;
+	@property({ type: Boolean })
+	showScriptCopiedFeedback = false;
+	@property({ type: Boolean })
+	showInfoSection = false;
 
 	@property()
 	title = '';
@@ -66,6 +72,9 @@ export class MyElement extends LitElement {
 			label: this.content.imgPosition.optionNoImg,
 		},
 	];
+
+	cdnScript =
+		'<script type="module" src="https://cdn.jsdelivr.net/gh/studiohyperdrive/studiohyperdrive-zender-wiki-embed@release/stable/dist/zender-wiki-embed.min.js"></script>';
 
 	//#endregion VARIABLES
 
@@ -253,6 +262,11 @@ export class MyElement extends LitElement {
 	}
 
 	generateOutputCode() {
+		if (!this.isSourceInJson) {
+			this.outputSource = `<div data-my-wiki-el searchValue="${this.qId}" imgPosition="${this.imgPosition}"></div>`;
+			return;
+		}
+
 		const code = {
 			'data-my-wiki-el': '',
 			searchvalue: this.qId,
@@ -262,6 +276,19 @@ export class MyElement extends LitElement {
 		this.outputSource = `'${JSON.stringify(code, null, 2)}'`;
 	}
 
+	toggleInfoSection() {
+		this.showInfoSection = !this.showInfoSection;
+	}
+
+	copyScriptToclipboard() {
+		removeFocus();
+
+		navigator.clipboard.writeText(this.cdnScript);
+
+		this.showScriptCopiedFeedback = true;
+		setTimeout(() => (this.showScriptCopiedFeedback = false), 1500);
+	}
+
 	copyCodeToclipboard() {
 		removeFocus();
 
@@ -269,6 +296,10 @@ export class MyElement extends LitElement {
 
 		this.showCodeCopiedFeedback = true;
 		setTimeout(() => (this.showCodeCopiedFeedback = false), 1500);
+	}
+
+	toggleCodeLang(isJSON: boolean) {
+		this.isSourceInJson = isJSON;
 	}
 	//#endregion UTILS
 
@@ -298,9 +329,33 @@ export class MyElement extends LitElement {
 		`;
 	}
 
+	renderInfo() {
+		return html`
+			<p>${this.content.info.description}</p>
+
+			<div class="code-block">
+				<code> ${this.cdnScript} </code>
+				${this.showScriptCopiedFeedback ? html`<span>${this.content.info.btnClickFeedback}</span>` : ''}
+				<button class="btn btn-code-copy" @click=${this.copyScriptToclipboard}>${this.content.info.btnText}</button>
+			</div>
+		`;
+	}
+
 	renderCodeBlock() {
 		return html`
 			<h2>${this.content.code.title}:</h2>
+
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+					<a class="nav-link ${this.isSourceInJson ? 'active' : ''}" @click=${() => this.toggleCodeLang(true)}>JSON</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link ${!this.isSourceInJson ? 'active' : ''}" @click=${() => this.toggleCodeLang(false)}
+						>HTML</a
+					>
+				</li>
+			</ul>
+
 			<div class="code-block">
 				<code> ${this.outputSource} </code>
 				${this.showCodeCopiedFeedback ? html`<span>${this.content.code.btnClickFeedback}</span>` : ''}
@@ -323,8 +378,13 @@ export class MyElement extends LitElement {
 					<button class="btn search-btn" @click=${this.debouncedFetchWiki} part="button" tabindex="2">
 						${this.content.search.btnText}
 					</button>
+					<button class="btn btn-outline" @click=${this.toggleInfoSection} part="button" tabindex="3">?</button>
 				</div>
 				${this.errorMessage ? html`<p class="invalid-input-feedback">${this.errorMessage}</p>` : ''}
+
+				<!-- eslint-disable-next-line prettier/prettier -->
+				${this.showInfoSection ? this.renderInfo() : ''}
+
 				<!-- eslint-disable-next-line prettier/prettier -->
 				${this.qId ? this.renderImgPositionSetting() : ''}
 			</div>

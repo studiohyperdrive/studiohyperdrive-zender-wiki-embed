@@ -265,4 +265,9 @@ export const MyElementStyle = css`
 		isolation: isolate;
 		border-color: var(--bs-nav-tabs-link-hover-border-color);
 	}
+
+	.width-border {
+		--bs-nav-tabs-border-width: 1px;
+		--bs-nav-tabs-border-color: #dee2e6;
+	}
 `;

@@ -52,7 +52,10 @@ export class MyElement extends LitElement {
 	@property()
 	errorMessage = '';
 
-	content = currentLanguage === 'nl' ? translatedContent.nl : translatedContent.en;
+	@property()
+	activeLanguage = currentLanguage;
+	@property()
+	content = this.activeLanguage === 'nl' ? translatedContent.nl : translatedContent.en;
 
 	radioGroup = [
 		{
@@ -88,6 +91,32 @@ export class MyElement extends LitElement {
 		if (!changedProperties.has('outputSource') && !changedProperties.has('searchValue')) {
 			this.generateOutputCode();
 		}
+
+		if (this.isConfigMode && changedProperties.has('activeLanguage') && changedProperties.get('activeLanguage')) {
+			this.content = this.activeLanguage === 'nl' ? translatedContent.nl : translatedContent.en;
+			this.radioGroup = [
+				{
+					id: 'img-left',
+					label: this.content.imgPosition.optionLeft,
+				},
+				{
+					id: 'img-right',
+					label: this.content.imgPosition.optionRight,
+				},
+				{
+					id: 'img-bottom',
+					label: this.content.imgPosition.optionBottom,
+				},
+				{
+					id: 'no-img',
+					label: this.content.imgPosition.optionNoImg,
+				},
+			];
+
+			if (this.qId) {
+				this.debouncedFetchWiki();
+			}
+		}
 	}
 	//#endregion LIFECYCLE METHODS
 
@@ -103,13 +132,13 @@ export class MyElement extends LitElement {
 			return;
 		}
 
-		if (languageCode === currentLanguage) {
+		if (languageCode === this.activeLanguage) {
 			const urlByPageId = getContentUrlByTitle(infoBypageId.title, languageCode);
 
 			return urlByPageId;
 		}
 
-		const langLinkCurrLang = infoBypageId?.langlinks?.find(({ lang }) => lang === currentLanguage);
+		const langLinkCurrLang = infoBypageId?.langlinks?.find(({ lang }) => lang === this.activeLanguage);
 
 		let urlByPageId;
 		if (!langLinkCurrLang) {
@@ -127,7 +156,7 @@ export class MyElement extends LitElement {
 		const urlRegex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org\/wiki\/([^/]+)/;
 		const [, , , languageCode, title] = url.match(urlRegex) || [];
 
-		if (languageCode === currentLanguage) {
+		if (languageCode === this.activeLanguage) {
 			const wikiUrl = getContentUrlByTitle(title, languageCode);
 
 			return wikiUrl;
@@ -140,7 +169,7 @@ export class MyElement extends LitElement {
 			return;
 		}
 
-		const langLinkCurrLang = langLinks.find(({ code }) => code === currentLanguage);
+		const langLinkCurrLang = langLinks.find(({ code }) => code === this.activeLanguage);
 
 		let wikiUrl;
 		if (!langLinkCurrLang) {
@@ -179,7 +208,9 @@ export class MyElement extends LitElement {
 		const titlesByLang = await getTitlesAndLangsByQid(wikiId);
 
 		const titleInCurrLang =
-			titlesByLang?.[`${currentLanguage}wiki`] || titlesByLang?.['enwiki'] || Object.values(titlesByLang ?? {})?.[0];
+			titlesByLang?.[`${this.activeLanguage}wiki`] ||
+			titlesByLang?.['enwiki'] ||
+			Object.values(titlesByLang ?? {})?.[0];
 
 		if (!titleInCurrLang) {
 			this.errorMessage = this.content.errors.invalid;
@@ -301,6 +332,10 @@ export class MyElement extends LitElement {
 	toggleCodeLang(isJSON: boolean) {
 		this.isSourceInJson = isJSON;
 	}
+
+	toggleLanguage(langCode: string) {
+		this.activeLanguage = langCode;
+	}
 	//#endregion UTILS
 
 	//#region RENDER
@@ -308,6 +343,8 @@ export class MyElement extends LitElement {
 
 	renderImgPositionSetting() {
 		return html`
+			<h2>Config:</h2>
+
 			<div>
 				${this.thumbnail?.source
 					? html`
@@ -331,7 +368,22 @@ export class MyElement extends LitElement {
 
 	renderInfo() {
 		return html`
-			<p>${this.content.info.description}</p>
+			<h2>Info:</h2>
+
+			<ul class="nav nav-tabs width-border">
+				<li class="nav-item">
+					<a class="nav-link ${this.activeLanguage === 'nl' ? 'active' : ''}" @click=${() => this.toggleLanguage('nl')}
+						>Nederlands</a
+					>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link ${this.activeLanguage === 'en' ? 'active' : ''}" @click=${() => this.toggleLanguage('en')}
+						>English</a
+					>
+				</li>
+			</ul>
+
+			<p style="white-space: pre-line;">${this.content.info.description}</p>
 
 			<div class="code-block">
 				<code> ${this.cdnScript} </code>

@@ -264,7 +264,7 @@ M.finalized = !0, M.elementProperties = /* @__PURE__ */ new Map(), M.elementStyl
  * SPDX-License-Identifier: BSD-3-Clause
  */
 var ge;
-const q = globalThis.trustedTypes, it = q ? q.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, x = `lit$${(Math.random() + "").slice(9)}$`, Bt = "?" + x, ur = `<${Bt}>`, H = document, Z = (r = "") => H.createComment(r), Y = (r) => r === null || typeof r != "object" && typeof r != "function", Lt = Array.isArray, dr = (r) => Lt(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", X = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, nt = /-->/g, ot = />/g, P = RegExp(`>|[ 	
+const q = globalThis.trustedTypes, it = q ? q.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, x = `lit$${(Math.random() + "").slice(9)}$`, Bt = "?" + x, ur = `<${Bt}>`, H = document, G = (r = "") => H.createComment(r), Y = (r) => r === null || typeof r != "object" && typeof r != "function", Lt = Array.isArray, dr = (r) => Lt(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", K = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, nt = /-->/g, ot = />/g, P = RegExp(`>|[ 	
 \f\r](?:([^\\s"'>=/]+)([ 	
 \f\r]*=[ 	
 \f\r]*(?:[^ 	
@@ -274,19 +274,19 @@ const q = globalThis.trustedTypes, it = q ? q.createPolicy("lit-html", { createH
   let s = o._$litPart$;
   if (s === void 0) {
     const l = (n = t == null ? void 0 : t.renderBefore) !== null && n !== void 0 ? n : null;
-    o._$litPart$ = s = new te(e.insertBefore(Z(), l), l, void 0, t != null ? t : {});
+    o._$litPart$ = s = new te(e.insertBefore(G(), l), l, void 0, t != null ? t : {});
   }
   return s._$AI(r), s;
 }, D = H.createTreeWalker(H, 129, null, !1), fr = (r, e) => {
   const t = r.length - 1, i = [];
-  let n, o = e === 2 ? "<svg>" : "", s = X;
+  let n, o = e === 2 ? "<svg>" : "", s = K;
   for (let a = 0; a < t; a++) {
     const u = r[a];
     let h, d, c = -1, f = 0;
     for (; f < u.length && (s.lastIndex = f, d = s.exec(u), d !== null); )
-      f = s.lastIndex, s === X ? d[1] === "!--" ? s = nt : d[1] !== void 0 ? s = ot : d[2] !== void 0 ? (Mt.test(d[2]) && (n = RegExp("</" + d[2], "g")), s = P) : d[3] !== void 0 && (s = P) : s === P ? d[0] === ">" ? (s = n != null ? n : X, c = -1) : d[1] === void 0 ? c = -2 : (c = s.lastIndex - d[2].length, h = d[1], s = d[3] === void 0 ? P : d[3] === '"' ? at : st) : s === at || s === st ? s = P : s === nt || s === ot ? s = X : (s = P, n = void 0);
+      f = s.lastIndex, s === K ? d[1] === "!--" ? s = nt : d[1] !== void 0 ? s = ot : d[2] !== void 0 ? (Mt.test(d[2]) && (n = RegExp("</" + d[2], "g")), s = P) : d[3] !== void 0 && (s = P) : s === P ? d[0] === ">" ? (s = n != null ? n : K, c = -1) : d[1] === void 0 ? c = -2 : (c = s.lastIndex - d[2].length, h = d[1], s = d[3] === void 0 ? P : d[3] === '"' ? at : st) : s === at || s === st ? s = P : s === nt || s === ot ? s = K : (s = P, n = void 0);
     const U = s === P && r[a + 1].startsWith("/>") ? " " : "";
-    o += s === X ? u + ur : c >= 0 ? (i.push(h), u.slice(0, c) + "$lit$" + u.slice(c) + x + U) : u + x + (c === -2 ? (i.push(void 0), a) : U);
+    o += s === K ? u + ur : c >= 0 ? (i.push(h), u.slice(0, c) + "$lit$" + u.slice(c) + x + U) : u + x + (c === -2 ? (i.push(void 0), a) : U);
   }
   const l = o + (r[t] || "<?>") + (e === 2 ? "</svg>" : "");
   if (!Array.isArray(r) || !r.hasOwnProperty("raw"))
@@ -324,8 +324,8 @@ class ee {
           if (c > 0) {
             n.textContent = q ? q.emptyScript : "";
             for (let f = 0; f < c; f++)
-              n.append(d[f], Z()), D.nextNode(), a.push({ type: 2, index: ++o });
-            n.append(d[c], Z());
+              n.append(d[f], G()), D.nextNode(), a.push({ type: 2, index: ++o });
+            n.append(d[c], G());
           }
         }
       } else if (n.nodeType === 8)
@@ -433,7 +433,7 @@ class te {
     const t = this._$AH;
     let i, n = 0;
     for (const o of e)
-      n === t.length ? t.push(i = new te(this.j(Z()), this.j(Z()), this, this.options)) : i = t[n], i._$AI(o), n++;
+      n === t.length ? t.push(i = new te(this.j(G()), this.j(G()), this, this.options)) : i = t[n], i._$AI(o), n++;
     n < t.length && (this._$AR(i && i._$AB.nextSibling, n), t.length = n);
   }
   _$AR(e = this._$AA.nextSibling, t) {
@@ -527,7 +527,7 @@ ct == null || ct(ee, te), ((ge = globalThis.litHtmlVersions) !== null && ge !== 
  * SPDX-License-Identifier: BSD-3-Clause
  */
 var ye, $e;
-class G extends M {
+class X extends M {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
@@ -552,9 +552,9 @@ class G extends M {
     return F;
   }
 }
-G.finalized = !0, G._$litElement$ = !0, (ye = globalThis.litElementHydrateSupport) === null || ye === void 0 || ye.call(globalThis, { LitElement: G });
+X.finalized = !0, X._$litElement$ = !0, (ye = globalThis.litElementHydrateSupport) === null || ye === void 0 || ye.call(globalThis, { LitElement: X });
 const ut = globalThis.litElementPolyfillSupport;
-ut == null || ut({ LitElement: G });
+ut == null || ut({ LitElement: X });
 (($e = globalThis.litElementVersions) !== null && $e !== void 0 ? $e : globalThis.litElementVersions = []).push("3.2.2");
 /**
  * @license
@@ -804,8 +804,8 @@ ae.prototype.forEach = function(e) {
     i !== null && e(i);
   });
 };
-var Qr = ae, Kr = g, Xr = function(e, t) {
-  Kr.forEach(e, function(n, o) {
+var Qr = ae, Zr = g, Kr = function(e, t) {
+  Zr.forEach(e, function(n, o) {
     o !== t && o.toUpperCase() === t.toUpperCase() && (e[t] = n, delete e[o]);
   });
 }, zt = g;
@@ -857,7 +857,7 @@ var V = z, Jt = {
   forcedJSONParsing: !0,
   clarifyTimeoutError: !1
 }, S = g;
-function Gr(r, e) {
+function Xr(r, e) {
   e = e || new FormData();
   var t = [];
   function i(o) {
@@ -888,8 +888,8 @@ function Gr(r, e) {
   }
   return n(r), e;
 }
-var Qt = Gr, Ee, ht;
-function Zr() {
+var Qt = Xr, Ee, ht;
+function Gr() {
   if (ht)
     return Ee;
   ht = 1;
@@ -941,7 +941,7 @@ var ei = function(e) {
   return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(e);
 }, ti = function(e, t) {
   return t ? e.replace(/\/+$/, "") + "/" + t.replace(/^\/+/, "") : e;
-}, ri = ei, ii = ti, Kt = function(e, t) {
+}, ri = ei, ii = ti, Zt = function(e, t) {
   return e && !ri(t) ? ii(e, t) : t;
 }, Ae, ft;
 function ni() {
@@ -1035,11 +1035,11 @@ function yt() {
   if (gt)
     return xe;
   gt = 1;
-  var r = g, e = Zr(), t = Yr(), i = jt, n = Kt, o = ni(), s = oi(), l = Jt, a = V, u = le(), h = si();
+  var r = g, e = Gr(), t = Yr(), i = jt, n = Zt, o = ni(), s = oi(), l = Jt, a = V, u = le(), h = si();
   return xe = function(c) {
     return new Promise(function(U, A) {
-      var J = c.data, Q = c.headers, K = c.responseType, N;
-      function Xe() {
+      var J = c.data, Q = c.headers, Z = c.responseType, N;
+      function Ke() {
         c.cancelToken && c.cancelToken.unsubscribe(N), c.signal && c.signal.removeEventListener("abort", N);
       }
       r.isFormData(J) && r.isStandardBrowserEnv() && delete Q["Content-Type"];
@@ -1050,9 +1050,9 @@ function yt() {
       }
       var pe = n(c.baseURL, c.url);
       p.open(c.method.toUpperCase(), i(pe, c.params, c.paramsSerializer), !0), p.timeout = c.timeout;
-      function Ge() {
+      function Xe() {
         if (!!p) {
-          var k = "getAllResponseHeaders" in p ? o(p.getAllResponseHeaders()) : null, I = !K || K === "text" || K === "json" ? p.responseText : p.response, R = {
+          var k = "getAllResponseHeaders" in p ? o(p.getAllResponseHeaders()) : null, I = !Z || Z === "text" || Z === "json" ? p.responseText : p.response, R = {
             data: I,
             status: p.status,
             statusText: p.statusText,
@@ -1061,14 +1061,14 @@ function yt() {
             request: p
           };
           e(function(be) {
-            U(be), Xe();
+            U(be), Ke();
           }, function(be) {
-            A(be), Xe();
+            A(be), Ke();
           }, R), p = null;
         }
       }
-      if ("onloadend" in p ? p.onloadend = Ge : p.onreadystatechange = function() {
-        !p || p.readyState !== 4 || p.status === 0 && !(p.responseURL && p.responseURL.indexOf("file:") === 0) || setTimeout(Ge);
+      if ("onloadend" in p ? p.onloadend = Xe : p.onreadystatechange = function() {
+        !p || p.readyState !== 4 || p.status === 0 && !(p.responseURL && p.responseURL.indexOf("file:") === 0) || setTimeout(Xe);
       }, p.onabort = function() {
         !p || (A(new a("Request aborted", a.ECONNABORTED, c, p)), p = null);
       }, p.onerror = function() {
@@ -1082,12 +1082,12 @@ function yt() {
           p
         )), p = null;
       }, r.isStandardBrowserEnv()) {
-        var Ze = (c.withCredentials || s(pe)) && c.xsrfCookieName ? t.read(c.xsrfCookieName) : void 0;
-        Ze && (Q[c.xsrfHeaderName] = Ze);
+        var Ge = (c.withCredentials || s(pe)) && c.xsrfCookieName ? t.read(c.xsrfCookieName) : void 0;
+        Ge && (Q[c.xsrfHeaderName] = Ge);
       }
       "setRequestHeader" in p && r.forEach(Q, function(I, R) {
         typeof J > "u" && R.toLowerCase() === "content-type" ? delete Q[R] : p.setRequestHeader(R, I);
-      }), r.isUndefined(c.withCredentials) || (p.withCredentials = !!c.withCredentials), K && K !== "json" && (p.responseType = c.responseType), typeof c.onDownloadProgress == "function" && p.addEventListener("progress", c.onDownloadProgress), typeof c.onUploadProgress == "function" && p.upload && p.upload.addEventListener("progress", c.onUploadProgress), (c.cancelToken || c.signal) && (N = function(k) {
+      }), r.isUndefined(c.withCredentials) || (p.withCredentials = !!c.withCredentials), Z && Z !== "json" && (p.responseType = c.responseType), typeof c.onDownloadProgress == "function" && p.addEventListener("progress", c.onDownloadProgress), typeof c.onUploadProgress == "function" && p.upload && p.upload.addEventListener("progress", c.onUploadProgress), (c.cancelToken || c.signal) && (N = function(k) {
         !p || (A(!k || k && k.type ? new u() : k), p.abort(), p = null);
       }, c.cancelToken && c.cancelToken.subscribe(N), c.signal && (c.signal.aborted ? N() : c.signal.addEventListener("abort", N))), J || (J = null);
       var fe = h(pe);
@@ -1103,7 +1103,7 @@ var Re, $t;
 function ai() {
   return $t || ($t = 1, Re = null), Re;
 }
-var v = g, wt = Xr, Et = V, li = Jt, ci = Qt, ui = {
+var v = g, wt = Kr, Et = V, li = Jt, ci = Qt, ui = {
   "Content-Type": "application/x-www-form-urlencoded"
 };
 function _t(r, e) {
@@ -1181,12 +1181,12 @@ var Qe = ce, pi = g, fi = Qe, bi = function(e, t, i) {
     e = s.call(n, e, t);
   }), e;
 }, Pe, At;
-function Xt() {
+function Kt() {
   return At || (At = 1, Pe = function(e) {
     return !!(e && e.__CANCEL__);
   }), Pe;
 }
-var kt = g, Oe = bi, vi = Xt(), mi = Qe, gi = le();
+var kt = g, Oe = bi, vi = Kt(), mi = Qe, gi = le();
 function Te(r) {
   if (r.cancelToken && r.cancelToken.throwIfRequested(), r.signal && r.signal.aborted)
     throw new gi();
@@ -1223,7 +1223,7 @@ var yi = function(e) {
       e.transformResponse
     ))), Promise.reject(n);
   });
-}, _ = g, Gt = function(e, t) {
+}, _ = g, Xt = function(e, t) {
   t = t || {};
   var i = {};
   function n(h, d) {
@@ -1287,19 +1287,19 @@ var yi = function(e) {
     _.isUndefined(f) && c !== a || (i[d] = f);
   }), i;
 }, Ue, St;
-function Zt() {
+function Gt() {
   return St || (St = 1, Ue = {
     version: "0.27.2"
   }), Ue;
 }
-var $i = Zt().version, C = V, Ke = {};
+var $i = Gt().version, C = V, Ze = {};
 ["object", "boolean", "number", "function", "string", "symbol"].forEach(function(r, e) {
-  Ke[r] = function(i) {
+  Ze[r] = function(i) {
     return typeof i === r || "a" + (e < 1 ? "n " : " ") + r;
   };
 });
 var Ct = {};
-Ke.transitional = function(e, t, i) {
+Ze.transitional = function(e, t, i) {
   function n(o, s) {
     return "[Axios v" + $i + "] Transitional option '" + o + "'" + s + (i ? ". " + i : "");
   }
@@ -1334,8 +1334,8 @@ function wi(r, e, t) {
 }
 var Ei = {
   assertOptions: wi,
-  validators: Ke
-}, Yt = g, _i = jt, xt = Qr, Rt = yi, ue = Gt, Ai = Kt, er = Ei, L = er.validators;
+  validators: Ze
+}, Yt = g, _i = jt, xt = Qr, Rt = yi, ue = Xt, Ai = Zt, er = Ei, L = er.validators;
 function W(r) {
   this.defaults = r, this.interceptors = {
     request: new xt(),
@@ -1486,7 +1486,7 @@ function xi() {
     return r.isObject(t) && t.isAxiosError === !0;
   }, Be;
 }
-var Ut = g, Ri = qt, ne = ki, Pi = Gt, Oi = Qe;
+var Ut = g, Ri = qt, ne = ki, Pi = Xt, Oi = Qe;
 function tr(r) {
   var e = new ne(r), t = Ri(ne.prototype.request, e);
   return Ut.extend(t, ne.prototype, e), Ut.extend(t, e), t.create = function(n) {
@@ -1497,8 +1497,8 @@ var E = tr(Oi);
 E.Axios = ne;
 E.CanceledError = le();
 E.CancelToken = Si();
-E.isCancel = Xt();
-E.VERSION = Zt().version;
+E.isCancel = Kt();
+E.VERSION = Gt().version;
 E.toFormData = Qt;
 E.AxiosError = V;
 E.Cancel = E.CanceledError;
@@ -1554,9 +1554,9 @@ const de = /* @__PURE__ */ kr(Dt.exports), he = {
 }, Mi = () => document.documentElement.lang || "nl", { language: Di } = new Intl.Locale(Mi()), re = {
   en: {
     info: {
-      description: `This tool makes it easy to embed Wikipedia summaries into your website. To get started include the script into your website, then search for your desired Wikipedia article. Copy the html code and paste it into a page. The article will be shown in the language of the website (if available).
-
-				If you're using this tool for "Zender" then just copy the JSON code into the cms.`,
+      description: `This tool makes it easy to embed Wikipedia summaries into your website. To get started include the script into your website, then search for your desired Wikipedia article. 
+			Copy the HTML code and paste it into a page. The article will be shown in the language of the website (if available).`,
+      descriptionForZender: `If you're using this tool for "Zender" then just copy the JSON code into the CMS.`,
       btnText: "copy script",
       btnClickFeedback: "script copied!"
     },
@@ -1588,10 +1588,10 @@ const de = /* @__PURE__ */ kr(Dt.exports), he = {
   },
   nl: {
     info: {
-      description: `Deze site maakt het gemakkelijk om Wikipedia samenvattingen toe te voegen in uw website. Om te starten moet u de onderstaande script kopi\xEBren en in uw site plakken, daarna zoekt u uw gewenste Wikipedia artikel en kopi\xEBrt u de html code in een pagina. De artikel zal in de taal van uw website weergegeven worden (indien beschikbaar).
-				
-				Als u deze toepassing gebruikt voor "Zender", dan moet u alleen de JSON code kopi\xEBren en plakken in het gewenste CMS.
-				`,
+      description: `Deze site maakt het gemakkelijk om Wikipedia samenvattingen toe te voegen in uw website. 
+			Om te starten moet u de onderstaande script kopi\xEBren en in uw site plakken, daarna zoekt u uw gewenste Wikipedia artikel en kopi\xEBrt u de HTML code in een pagina. 
+			Het artikel zal in de taal van uw website weergegeven worden (indien beschikbaar).`,
+      descriptionForZender: 'Als u deze toepassing gebruikt voor "Zender", dan moet u alleen de JSON code kopi\xEBren en plakken in het gewenste CMS.',
       btnText: "kopi\xEBr script",
       btnClickFeedback: "script gekopieerd!"
     },
@@ -1897,7 +1897,7 @@ var Hi = Object.defineProperty, Fi = Object.getOwnPropertyDescriptor, y = (r, e,
     (s = r[o]) && (n = (i ? s(e, t, n) : s(n)) || n);
   return i && n && Hi(e, t, n), n;
 };
-let b = class extends G {
+let b = class extends X {
   constructor() {
     super(...arguments), this.isConfigMode = !1, this.searchValue = "", this.qId = "", this.outputSource = "", this.isSourceInJson = !0, this.showCodeCopiedFeedback = !1, this.showScriptCopiedFeedback = !1, this.showInfoSection = !1, this.title = "", this.description = "", this.thumbnail = { source: "", height: 0, width: 0 }, this.imgPosition = "img-left", this.pageSource = "", this.errorMessage = "", this.activeLanguage = Di, this.content = this.activeLanguage === "nl" ? re.nl : re.en, this.radioGroup = [
       {
@@ -2074,13 +2074,15 @@ let b = class extends G {
 				</li>
 			</ul>
 
-			<p style="white-space: pre-line;">${this.content.info.description}</p>
+			<p>${this.content.info.description}</p>
 
-			<div class="code-block">
+			<div class="code-block" style="margin-bottom: 0">
 				<code> ${this.cdnScript} </code>
 				${this.showScriptCopiedFeedback ? w`<span>${this.content.info.btnClickFeedback}</span>` : ""}
 				<button class="btn btn-code-copy" @click=${this.copyScriptToclipboard}>${this.content.info.btnText}</button>
 			</div>
+
+			<p style="margin-bottom: 2rem;">${this.content.info.descriptionForZender}</p>
 		`;
   }
   renderCodeBlock() {

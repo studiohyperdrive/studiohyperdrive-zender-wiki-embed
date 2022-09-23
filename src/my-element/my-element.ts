@@ -383,13 +383,15 @@ export class MyElement extends LitElement {
 				</li>
 			</ul>
 
-			<p style="white-space: pre-line;">${this.content.info.description}</p>
+			<p>${this.content.info.description}</p>
 
-			<div class="code-block">
+			<div class="code-block" style="margin-bottom: 0">
 				<code> ${this.cdnScript} </code>
 				${this.showScriptCopiedFeedback ? html`<span>${this.content.info.btnClickFeedback}</span>` : ''}
 				<button class="btn btn-code-copy" @click=${this.copyScriptToclipboard}>${this.content.info.btnText}</button>
 			</div>
+
+			<p style="margin-bottom: 2rem;">${this.content.info.descriptionForZender}</p>
 		`;
 	}
 

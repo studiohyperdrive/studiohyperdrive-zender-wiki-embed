@@ -11,7 +11,7 @@ import {
 	getTitlesAndLangsByQid,
 } from '../utils/api';
 import { debounceLeading, removeFocus, stringToUrl } from '../utils/helpers';
-import { currentLanguage } from '../utils/language';
+import { currentLanguage, translatedContent } from '../utils/language';
 import { MyElementStyle } from './my-element.style';
 import { WikiImage, WikiSummaryResponse } from './my-element.types';
 
@@ -31,7 +31,13 @@ export class MyElement extends LitElement {
 	@property()
 	outputSource = '';
 	@property({ type: Boolean })
+	isSourceInJson = true;
+	@property({ type: Boolean })
 	showCodeCopiedFeedback = false;
+	@property({ type: Boolean })
+	showScriptCopiedFeedback = false;
+	@property({ type: Boolean })
+	showInfoSection = false;
 
 	@property()
 	title = '';
@@ -46,31 +52,33 @@ export class MyElement extends LitElement {
 	@property()
 	errorMessage = '';
 
+	@property()
+	activeLanguage = currentLanguage;
+	@property()
+	content = this.activeLanguage === 'nl' ? translatedContent.nl : translatedContent.en;
+
 	radioGroup = [
 		{
 			id: 'img-left',
-			label: 'On the left',
+			label: this.content.imgPosition.optionLeft,
 		},
 		{
 			id: 'img-right',
-			label: 'On the right',
+			label: this.content.imgPosition.optionRight,
 		},
 		{
 			id: 'img-bottom',
-			label: 'Under text',
+			label: this.content.imgPosition.optionBottom,
 		},
 		{
 			id: 'no-img',
-			label: 'Hide image',
+			label: this.content.imgPosition.optionNoImg,
 		},
 	];
 
-	readMoreLabel = currentLanguage === 'nl' ? 'Lees meer' : 'Read more';
+	cdnScript =
+		'<script type="module" src="https://cdn.jsdelivr.net/gh/studiohyperdrive/studiohyperdrive-zender-wiki-embed@release/stable/dist/zender-wiki-embed.min.js"></script>';
 
-	errors = {
-		invalid: 'Please enter a valid Q-ID or a Wikipedia url.',
-		notSupported: 'Could not find the english version of this Wikipedia article.',
-	};
 	//#endregion VARIABLES
 
 	//#region LIFECYCLE METHODS
@@ -83,6 +91,32 @@ export class MyElement extends LitElement {
 		if (!changedProperties.has('outputSource') && !changedProperties.has('searchValue')) {
 			this.generateOutputCode();
 		}
+
+		if (this.isConfigMode && changedProperties.has('activeLanguage') && changedProperties.get('activeLanguage')) {
+			this.content = this.activeLanguage === 'nl' ? translatedContent.nl : translatedContent.en;
+			this.radioGroup = [
+				{
+					id: 'img-left',
+					label: this.content.imgPosition.optionLeft,
+				},
+				{
+					id: 'img-right',
+					label: this.content.imgPosition.optionRight,
+				},
+				{
+					id: 'img-bottom',
+					label: this.content.imgPosition.optionBottom,
+				},
+				{
+					id: 'no-img',
+					label: this.content.imgPosition.optionNoImg,
+				},
+			];
+
+			if (this.qId) {
+				this.debouncedFetchWiki();
+			}
+		}
 	}
 	//#endregion LIFECYCLE METHODS
 
@@ -94,21 +128,21 @@ export class MyElement extends LitElement {
 		const infoBypageId = await getAvailableLangByPageId(pageId, languageCode);
 
 		if (!infoBypageId) {
-			this.errorMessage = this.errors.invalid;
+			this.errorMessage = this.content.errors.invalid;
 			return;
 		}
 
-		if (languageCode === currentLanguage) {
+		if (languageCode === this.activeLanguage) {
 			const urlByPageId = getContentUrlByTitle(infoBypageId.title, languageCode);
 
 			return urlByPageId;
 		}
 
-		const langLinkCurrLang = infoBypageId?.langlinks?.find(({ lang }) => lang === currentLanguage);
+		const langLinkCurrLang = infoBypageId?.langlinks?.find(({ lang }) => lang === this.activeLanguage);
 
 		let urlByPageId;
 		if (!langLinkCurrLang) {
-			this.errorMessage = this.errors.notSupported;
+			this.errorMessage = this.content.errors.notSupported;
 			urlByPageId = getContentUrlByTitle(infoBypageId.title, languageCode);
 		} else {
 			urlByPageId = getContentUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
@@ -122,7 +156,7 @@ export class MyElement extends LitElement {
 		const urlRegex = /(https:\/\/)?(www\.)?([a-zA-Z]+)\.wikipedia\.org\/wiki\/([^/]+)/;
 		const [, , , languageCode, title] = url.match(urlRegex) || [];
 
-		if (languageCode === currentLanguage) {
+		if (languageCode === this.activeLanguage) {
 			const wikiUrl = getContentUrlByTitle(title, languageCode);
 
 			return wikiUrl;
@@ -131,17 +165,17 @@ export class MyElement extends LitElement {
 		const langLinks = await getAvailableLangByTitle(title, languageCode);
 
 		if (!langLinks) {
-			this.errorMessage = this.errors.invalid;
+			this.errorMessage = this.content.errors.invalid;
 			return;
 		}
 
-		const langLinkCurrLang = langLinks.find(({ code }) => code === currentLanguage);
+		const langLinkCurrLang = langLinks.find(({ code }) => code === this.activeLanguage);
 
 		let wikiUrl;
 		if (!langLinkCurrLang) {
 			wikiUrl = getContentUrlByTitle(title, languageCode);
 
-			this.errorMessage = this.errors.notSupported;
+			this.errorMessage = this.content.errors.notSupported;
 		} else {
 			wikiUrl = getContentUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
 		}
@@ -153,7 +187,7 @@ export class MyElement extends LitElement {
 		const urlObject = stringToUrl(url);
 
 		if (!urlObject) {
-			this.errorMessage = this.errors.invalid;
+			this.errorMessage = this.content.errors.invalid;
 			return;
 		}
 
@@ -174,10 +208,12 @@ export class MyElement extends LitElement {
 		const titlesByLang = await getTitlesAndLangsByQid(wikiId);
 
 		const titleInCurrLang =
-			titlesByLang?.[`${currentLanguage}wiki`] || titlesByLang?.['enwiki'] || Object.values(titlesByLang ?? {})?.[0];
+			titlesByLang?.[`${this.activeLanguage}wiki`] ||
+			titlesByLang?.['enwiki'] ||
+			Object.values(titlesByLang ?? {})?.[0];
 
 		if (!titleInCurrLang) {
-			this.errorMessage = this.errors.invalid;
+			this.errorMessage = this.content.errors.invalid;
 			return;
 		}
 
@@ -191,7 +227,7 @@ export class MyElement extends LitElement {
 		this.searchValue = this.searchValue.replace(/ /g, '');
 
 		if (this.searchValue.match(/^\s*$/)) {
-			this.errorMessage = this.errors.invalid;
+			this.errorMessage = this.content.errors.invalid;
 			return false;
 		}
 
@@ -257,6 +293,11 @@ export class MyElement extends LitElement {
 	}
 
 	generateOutputCode() {
+		if (!this.isSourceInJson) {
+			this.outputSource = `<div data-my-wiki-el searchValue="${this.qId}" imgPosition="${this.imgPosition}"></div>`;
+			return;
+		}
+
 		const code = {
 			'data-my-wiki-el': '',
 			searchvalue: this.qId,
@@ -264,6 +305,19 @@ export class MyElement extends LitElement {
 		};
 
 		this.outputSource = `'${JSON.stringify(code, null, 2)}'`;
+	}
+
+	toggleInfoSection() {
+		this.showInfoSection = !this.showInfoSection;
+	}
+
+	copyScriptToclipboard() {
+		removeFocus();
+
+		navigator.clipboard.writeText(this.cdnScript);
+
+		this.showScriptCopiedFeedback = true;
+		setTimeout(() => (this.showScriptCopiedFeedback = false), 1500);
 	}
 
 	copyCodeToclipboard() {
@@ -274,6 +328,14 @@ export class MyElement extends LitElement {
 		this.showCodeCopiedFeedback = true;
 		setTimeout(() => (this.showCodeCopiedFeedback = false), 1500);
 	}
+
+	toggleCodeLang(isJSON: boolean) {
+		this.isSourceInJson = isJSON;
+	}
+
+	toggleLanguage(langCode: string) {
+		this.activeLanguage = langCode;
+	}
 	//#endregion UTILS
 
 	//#region RENDER
@@ -281,10 +343,12 @@ export class MyElement extends LitElement {
 
 	renderImgPositionSetting() {
 		return html`
+			<h2>Config:</h2>
+
 			<div>
 				${this.thumbnail?.source
 					? html`
-							<p style="margin-bottom:0">Where should the image be positioned?</p>
+							<p style="margin-bottom:0">${this.content.imgPosition.title}</p>
 							${this.radioGroup.map(
 								(item) =>
 									html`<input
@@ -297,18 +361,59 @@ export class MyElement extends LitElement {
 										<label for="${item.id}">${item.label}</label><br />`,
 							)}
 					  `
-					: html`<p style="margin-bottom:0">No image availabe</p>`}
+					: html`<p style="margin-bottom:0">${this.content.imgPosition.noImgAvailable}</p>`}
 			</div>
+		`;
+	}
+
+	renderInfo() {
+		return html`
+			<h2>Info:</h2>
+
+			<ul class="nav nav-tabs width-border">
+				<li class="nav-item">
+					<a class="nav-link ${this.activeLanguage === 'nl' ? 'active' : ''}" @click=${() => this.toggleLanguage('nl')}
+						>Nederlands</a
+					>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link ${this.activeLanguage === 'en' ? 'active' : ''}" @click=${() => this.toggleLanguage('en')}
+						>English</a
+					>
+				</li>
+			</ul>
+
+			<p>${this.content.info.description}</p>
+
+			<div class="code-block" style="margin-bottom: 0">
+				<code> ${this.cdnScript} </code>
+				${this.showScriptCopiedFeedback ? html`<span>${this.content.info.btnClickFeedback}</span>` : ''}
+				<button class="btn btn-code-copy" @click=${this.copyScriptToclipboard}>${this.content.info.btnText}</button>
+			</div>
+
+			<p style="margin-bottom: 2rem;">${this.content.info.descriptionForZender}</p>
 		`;
 	}
 
 	renderCodeBlock() {
 		return html`
-			<h2>Code:</h2>
+			<h2>${this.content.code.title}:</h2>
+
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+					<a class="nav-link ${this.isSourceInJson ? 'active' : ''}" @click=${() => this.toggleCodeLang(true)}>JSON</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link ${!this.isSourceInJson ? 'active' : ''}" @click=${() => this.toggleCodeLang(false)}
+						>HTML</a
+					>
+				</li>
+			</ul>
+
 			<div class="code-block">
 				<code> ${this.outputSource} </code>
-				${this.showCodeCopiedFeedback ? html`<span>Code copied!</span>` : ''}
-				<button class="btn btn-code-copy" @click=${this.copyCodeToclipboard}>Copy code</button>
+				${this.showCodeCopiedFeedback ? html`<span>${this.content.code.btnClickFeedback}</span>` : ''}
+				<button class="btn btn-code-copy" @click=${this.copyCodeToclipboard}>${this.content.code.btnText}</button>
 			</div>
 		`;
 	}
@@ -319,16 +424,21 @@ export class MyElement extends LitElement {
 				<div class="wiki-input">
 					<input
 						class="search-input"
-						placeholder="Enter a Q-ID or a wikipedia page url"
+						placeholder="${this.content.search.inputPlaceholder}"
 						tabindex="1"
 						@input=${this.handleInputChange}
 						@keypress=${this.handleInputKeyPress} />
 
 					<button class="btn search-btn" @click=${this.debouncedFetchWiki} part="button" tabindex="2">
-						Show code & preview
+						${this.content.search.btnText}
 					</button>
+					<button class="btn btn-outline" @click=${this.toggleInfoSection} part="button" tabindex="3">?</button>
 				</div>
 				${this.errorMessage ? html`<p class="invalid-input-feedback">${this.errorMessage}</p>` : ''}
+
+				<!-- eslint-disable-next-line prettier/prettier -->
+				${this.showInfoSection ? this.renderInfo() : ''}
+
 				<!-- eslint-disable-next-line prettier/prettier -->
 				${this.qId ? this.renderImgPositionSetting() : ''}
 			</div>
@@ -339,31 +449,33 @@ export class MyElement extends LitElement {
 
 	render() {
 		return html`
-			${this.isConfigMode ? this.renderConfigMode() : ''}
+			<div class="${this.isConfigMode ? 'container' : ''}">
+				${this.isConfigMode ? this.renderConfigMode() : ''}
 
-			<!--eslint-disable-next-line prettier/prettier -->
-			${this.title && this.isConfigMode ? html`<h2>Preview:</h2>` : ''}
-			<div class="container ${this.imgPosition}">
-				<div class="content">
-					<h1 class="content-title">${this.title}</h1>
-					<p>${this.description}</p>
-				</div>
+				<!--eslint-disable-next-line prettier/prettier -->
+				${this.title && this.isConfigMode ? html`<h2>${this.content.preview.title}:</h2>` : ''}
+				<div class="content-container ${this.imgPosition}">
+					<div class="content">
+						<h1 class="content-title">${this.title}</h1>
+						<p>${this.description}</p>
+					</div>
 
-				${this.thumbnail?.source && this.imgPosition !== 'no-img'
-					? html`
-							<div class="thumbnail">
-								<img
-									src="${this.thumbnail.source}"
-									alt="photo of ${this.title}"
-									style="max-width: ${this.thumbnail.width}px" />
-							</div>
-					  `
-					: ''}
-
-				<div class="read-more">
-					${this.pageSource
-						? html`<p>${this.readMoreLabel}: <a href="${this.pageSource}">${this.pageSource}</a></p>`
+					${this.thumbnail?.source && this.imgPosition !== 'no-img'
+						? html`
+								<div class="thumbnail">
+									<img
+										src="${this.thumbnail.source}"
+										alt="photo of ${this.title}"
+										style="max-width: ${this.thumbnail.width}px" />
+								</div>
+						  `
 						: ''}
+
+					<div class="read-more">
+						${this.pageSource
+							? html`<p>${this.content.preview.readMore}: <a href="${this.pageSource}">${this.pageSource}</a></p>`
+							: ''}
+					</div>
 				</div>
 			</div>
 		`;

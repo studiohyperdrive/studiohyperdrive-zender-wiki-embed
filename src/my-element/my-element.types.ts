@@ -100,3 +100,24 @@ export interface ContentUrl {
 	talk: string;
 }
 //#endregion WikiSummaryResponse
+
+//#region WikiFullIntroResponse
+
+export interface FullIntroPages {
+	[pageId: string]: {
+		pageid: number;
+		ns: number;
+		title: string;
+		extract: string; // full intro in HTML
+	};
+}
+
+export interface FullIntroQuery {
+	pageids: string[];
+	pages: FullIntroPages;
+}
+
+export interface WikiFullIntroResponse {
+	query: FullIntroQuery;
+}
+//#endregion WikiFullIntroResponse

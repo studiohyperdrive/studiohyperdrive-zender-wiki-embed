@@ -1,19 +1,22 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 import { html, LitElement, PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import '../utils/index';
+
 import {
 	getAvailableLangByPageId,
 	getAvailableLangByTitle,
-	getContentUrlByTitle,
+	getSummaryUrlByTitle,
 	getSummaryByUrl,
 	getTitlesAndLangsByQid,
+	getFullIntroUrlByTitle,
+	getFullIntroByUrl,
 } from '../utils/api';
 import { debounceLeading, removeFocus, stringToUrl } from '../utils/helpers';
 import { currentLanguage, translatedContent } from '../utils/language';
 import { MyElementStyle } from './my-element.style';
-import { WikiImage, WikiSummaryResponse } from './my-element.types';
+import { WikiImage } from './my-element.types';
 
 @customElement('my-element')
 export class MyElement extends LitElement {
@@ -133,22 +136,27 @@ export class MyElement extends LitElement {
 		}
 
 		if (languageCode === this.activeLanguage) {
-			const urlByPageId = getContentUrlByTitle(infoBypageId.title, languageCode);
+			const summaryUrl = getSummaryUrlByTitle(infoBypageId.title, languageCode);
+			const fullIntroUrl = getFullIntroUrlByTitle(infoBypageId.title, languageCode);
 
-			return urlByPageId;
+			return { summaryUrl, fullIntroUrl };
 		}
 
 		const langLinkCurrLang = infoBypageId?.langlinks?.find(({ lang }) => lang === this.activeLanguage);
 
-		let urlByPageId;
+		let summaryUrl;
+		let fullIntroUrl;
+
 		if (!langLinkCurrLang) {
 			this.errorMessage = this.content.errors.notSupported;
-			urlByPageId = getContentUrlByTitle(infoBypageId.title, languageCode);
+			summaryUrl = getSummaryUrlByTitle(infoBypageId.title, languageCode);
+			fullIntroUrl = getFullIntroUrlByTitle(infoBypageId.title, languageCode);
 		} else {
-			urlByPageId = getContentUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
+			summaryUrl = getSummaryUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
+			fullIntroUrl = getFullIntroUrlByTitle(langLinkCurrLang?.['*'], langLinkCurrLang?.lang);
 		}
 
-		return urlByPageId;
+		return { summaryUrl, fullIntroUrl };
 	}
 
 	async getWikiByTitleUrl(url: string) {
@@ -157,9 +165,10 @@ export class MyElement extends LitElement {
 		const [, , , languageCode, title] = url.match(urlRegex) || [];
 
 		if (languageCode === this.activeLanguage) {
-			const wikiUrl = getContentUrlByTitle(title, languageCode);
+			const summaryUrl = getSummaryUrlByTitle(title, languageCode);
+			const fullIntroUrl = getFullIntroUrlByTitle(title, languageCode);
 
-			return wikiUrl;
+			return { summaryUrl, fullIntroUrl };
 		}
 
 		const langLinks = await getAvailableLangByTitle(title, languageCode);
@@ -171,16 +180,20 @@ export class MyElement extends LitElement {
 
 		const langLinkCurrLang = langLinks.find(({ code }) => code === this.activeLanguage);
 
-		let wikiUrl;
+		let summaryUrl;
+		let fullIntroUrl;
+
 		if (!langLinkCurrLang) {
-			wikiUrl = getContentUrlByTitle(title, languageCode);
+			summaryUrl = getSummaryUrlByTitle(title, languageCode);
+			fullIntroUrl = getFullIntroUrlByTitle(title, languageCode);
 
 			this.errorMessage = this.content.errors.notSupported;
 		} else {
-			wikiUrl = getContentUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
+			summaryUrl = getSummaryUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
+			fullIntroUrl = getFullIntroUrlByTitle(langLinkCurrLang?.title, langLinkCurrLang?.code);
 		}
 
-		return wikiUrl;
+		return { summaryUrl, fullIntroUrl };
 	}
 
 	async getWikiByurl(url: string) {
@@ -194,14 +207,14 @@ export class MyElement extends LitElement {
 		const pageId = urlObject.searchParams.get('curid');
 
 		if (pageId) {
-			const summaryUrl = this.getWikiByPageIdUrl(url, pageId);
+			const urls = this.getWikiByPageIdUrl(url, pageId);
 
-			return summaryUrl;
+			return urls;
 		}
 
-		const summaryUrl = this.getWikiByTitleUrl(url);
+		const urls = this.getWikiByTitleUrl(url);
 
-		return summaryUrl;
+		return urls;
 	}
 
 	async getWikiByQid(wikiId: string) {
@@ -218,8 +231,11 @@ export class MyElement extends LitElement {
 		}
 
 		const languageCode = titleInCurrLang.site.slice(0, 2);
-		const wikiUrl = getContentUrlByTitle(titleInCurrLang?.title, languageCode);
-		return wikiUrl;
+
+		const summaryUrl = getSummaryUrlByTitle(titleInCurrLang?.title, languageCode);
+		const fullIntroUrl = getFullIntroUrlByTitle(titleInCurrLang?.title, languageCode);
+
+		return { summaryUrl, fullIntroUrl };
 	}
 
 	isInputValid(): boolean {
@@ -245,16 +261,16 @@ export class MyElement extends LitElement {
 		// Checks if search value is a Q ID. Example: Q44077
 		const searchRegex = /^q[0-9]+$/i;
 
-		let summary: WikiSummaryResponse | null = null;
-		let summaryUrl;
+		let urls: { summaryUrl: string; fullIntroUrl: string } | undefined;
 
 		if (this.searchValue.match(searchRegex)) {
-			summaryUrl = await this.getWikiByQid(this.searchValue);
+			urls = await this.getWikiByQid(this.searchValue);
 		} else {
-			summaryUrl = await this.getWikiByurl(this.searchValue);
+			urls = await this.getWikiByurl(this.searchValue);
 		}
 
-		summary = await getSummaryByUrl(summaryUrl);
+		const summary = await getSummaryByUrl(urls?.summaryUrl);
+		const fullIntro = await getFullIntroByUrl(urls?.fullIntroUrl);
 
 		if (!summary) {
 			this.title = '';
@@ -267,8 +283,8 @@ export class MyElement extends LitElement {
 		}
 
 		this.qId = summary.wikibase_item;
-		this.description = summary.extract;
 		this.title = summary.title;
+		this.description = fullIntro?.pages[fullIntro.pageids[0]].extract ?? '';
 		this.thumbnail = summary?.thumbnail;
 		this.pageSource = summary.content_urls.desktop.page;
 		this.imgPosition = summary.thumbnail ? this.imgPosition : 'no-img';
@@ -457,7 +473,8 @@ export class MyElement extends LitElement {
 				<div class="content-container ${this.imgPosition}">
 					<div class="content">
 						<h1 class="content-title">${this.title}</h1>
-						<p>${this.description}</p>
+
+						${html`${unsafeHTML(this.description)}`}
 					</div>
 
 					${this.thumbnail?.source && this.imgPosition !== 'no-img'

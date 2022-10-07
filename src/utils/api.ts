@@ -3,6 +3,7 @@ import axios, { AxiosResponse } from 'axios';
 import { config } from '../config';
 import {
 	LanguageLinkResponse,
+	WikiFullIntroResponse,
 	WikiIdResponse,
 	WikiLanglinksResponse,
 	WikiSummaryResponse,
@@ -13,7 +14,7 @@ const cleanupTitle = (rawTitle: string) => {
 	return rawTitle.replace(/ /g, '_');
 };
 
-export const getContentUrlByTitle = (rawTitle?: string, languageCode?: string) => {
+export const getSummaryUrlByTitle = (rawTitle?: string, languageCode?: string) => {
 	if (!rawTitle || !languageCode) {
 		return '';
 	}
@@ -21,6 +22,16 @@ export const getContentUrlByTitle = (rawTitle?: string, languageCode?: string) =
 	const title = cleanupTitle(rawTitle);
 
 	return `${config.wikiRestApiUrl(languageCode)}/summary/${title}`;
+};
+
+export const getFullIntroUrlByTitle = (rawTitle?: string, languageCode?: string) => {
+	if (!rawTitle || !languageCode) {
+		return '';
+	}
+
+	const title = cleanupTitle(rawTitle);
+
+	return `${config.wikiActionApiUrl(languageCode)}&prop=extracts&exintro&indexpageids&titles=${title}`;
 };
 
 export const getAvailableLangByPageId = async (pageId: string, languageCode: string) => {
@@ -62,4 +73,14 @@ export const getSummaryByUrl = async (url: string | undefined) => {
 	const summary: AxiosResponse<WikiSummaryResponse> = await axios.get(url);
 
 	return summary.data;
+};
+
+export const getFullIntroByUrl = async (url: string | undefined) => {
+	if (!url) {
+		return null;
+	}
+
+	const fullIntro: AxiosResponse<WikiFullIntroResponse> = await axios.get(url);
+
+	return fullIntro.data?.query;
 };

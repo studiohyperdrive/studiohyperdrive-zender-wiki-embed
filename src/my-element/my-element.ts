@@ -14,6 +14,7 @@ import {
 	getFullIntroByUrl,
 } from '../utils/api';
 import { debounceLeading, removeFocus, stringToUrl } from '../utils/helpers';
+import { SanitizeHtml } from '../utils/htmlSanitizer';
 import { currentLanguage, translatedContent } from '../utils/language';
 import { MyElementStyle } from './my-element.style';
 import { WikiImage } from './my-element.types';
@@ -284,7 +285,7 @@ export class MyElement extends LitElement {
 
 		this.qId = summary.wikibase_item;
 		this.title = summary.title;
-		this.description = fullIntro?.pages[fullIntro.pageids[0]].extract ?? '';
+		this.description = SanitizeHtml(fullIntro?.pages[fullIntro.pageids[0]].extract ?? '');
 		this.thumbnail = summary?.thumbnail;
 		this.pageSource = summary.content_urls.desktop.page;
 		this.imgPosition = summary.thumbnail ? this.imgPosition : 'no-img';

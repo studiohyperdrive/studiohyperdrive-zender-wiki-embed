@@ -39,6 +39,7 @@ export const MyElementStyle = css`
 	}
 	.content-title {
 		margin-top: 0;
+		line-height: 0.8;
 	}
 
 	.thumbnail {

@@ -408,7 +408,24 @@ export class MyElement extends LitElement {
 				<button class="btn btn-code-copy" @click=${this.copyScriptToclipboard}>${this.content.info.btnText}</button>
 			</div>
 
-			<p style="margin-bottom: 2rem;">${this.content.info.descriptionForZender}</p>
+			<p style="margin-bottom: 2rem;">
+				${this.content.info.descriptionForZender}
+				<a
+					href="/Handleiding_Wordpress_Plugin_wiki_embed.pdf"
+					target="_blank"
+					alt="Plugin documentation for Wordpress"
+					title="Plugin documentation for Wordpress"
+					>open Wordpress</a
+				>
+				|
+				<a
+					href="/Handleiding_Drupal_module_Wiki_embed.pdf"
+					target="_blank"
+					alt="Plugin documentation for Drupal"
+					title="Plugin documentation for Drupal"
+					>open Drupal</a
+				>
+			</p>
 		`;
 	}
 

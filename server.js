@@ -20,6 +20,24 @@ const server = createServer((req, res) => {
 		return;
 	}
 
+	if (path === 'embed.svg') {
+		res.writeHead(200, { 'content-type': 'image/svg+xml' });
+		createReadStream('dist/embed.svg').pipe(res);
+		return;
+	}
+
+	if (path === 'Handleiding_Wordpress_Plugin_wiki_embed.pdf') {
+		res.writeHead(200, { 'content-type': 'application/pdf' });
+		createReadStream('dist/Handleiding_Wordpress_Plugin_wiki_embed.pdf').pipe(res);
+		return;
+	}
+
+	if (path === 'Handleiding_Drupal_module_Wiki_embed.pdf') {
+		res.writeHead(200, { 'content-type': 'application/pdf' });
+		createReadStream('dist/Handleiding_Drupal_module_Wiki_embed.pdf').pipe(res);
+		return;
+	}
+
 	res.writeHead(200, { 'content-type': 'text/html' });
 	createReadStream('index.html').pipe(res);
 });

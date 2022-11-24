@@ -7,7 +7,8 @@ export const translatedContent = {
 		info: {
 			description: `This tool makes it easy to embed Wikipedia summaries into your website. To get started include the script into your website, then search for your desired Wikipedia article. 
 			Copy the HTML code and paste it into a page. The article will be shown in the language of the website (if available).`,
-			descriptionForZender: 'If you\'re using this tool for "Zender" then just copy the JSON code into the CMS.',
+			descriptionForZender:
+				'Incase you are already using our CMS plugin, then you only have to copy the JSON code into the CMS. You can find the documentation for the plugins here (dutch only): ',
 			btnText: 'copy script',
 			btnClickFeedback: 'script copied!',
 		},
@@ -30,7 +31,7 @@ export const translatedContent = {
 		},
 		preview: {
 			title: 'Preview',
-			readMore: 'Read more',
+			readMore: 'Read more on Wikipedia',
 		},
 		errors: {
 			invalid: 'Please enter a valid Q-ID or a Wikipedia url.',
@@ -43,7 +44,7 @@ export const translatedContent = {
 			Om te starten moet u de onderstaande script kopiëren en in uw site plakken, daarna zoekt u uw gewenste Wikipedia artikel en kopiërt u de HTML code in een pagina. 
 			Het artikel zal in de taal van uw website weergegeven worden (indien beschikbaar).`,
 			descriptionForZender:
-				'Als u deze toepassing gebruikt voor "Zender", dan moet u alleen de JSON code kopiëren en plakken in het gewenste CMS.',
+				'Indien u al gebruikt maakt van onze plugin voor uw CMS, moet u alleen dan de JSON code kopiëren en plakken. Documentatie voor de plugins vindt u hier: ',
 			btnText: 'kopiër script',
 			btnClickFeedback: 'script gekopieerd!',
 		},
@@ -66,7 +67,7 @@ export const translatedContent = {
 		},
 		preview: {
 			title: 'Voorbeeld',
-			readMore: 'Lees meer',
+			readMore: 'Lees verder op Wikipedia',
 		},
 		errors: {
 			invalid: 'Gelieve een geldig Q-ID of een wikipedia url in te geven.',

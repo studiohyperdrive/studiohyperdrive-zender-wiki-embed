@@ -4,7 +4,7 @@
 ## General
 
 This repo contains the source code to the Wikipedia embed application, this application is used for 2 purposes:
-- Configurator for ToolForge (link here)
+- Configurator for ToolForge (https://wiki-embed.toolforge.org)
 - Script to preview Wikipedia articles
 
 It is build with:

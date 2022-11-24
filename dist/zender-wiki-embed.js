@@ -1746,7 +1746,7 @@ $1`).replace(/div><div/g, `div>
     },
     preview: {
       title: "Preview",
-      readMore: "Read more"
+      readMore: "Read more on Wikipedia"
     },
     errors: {
       invalid: "Please enter a valid Q-ID or a Wikipedia url.",
@@ -1781,7 +1781,7 @@ $1`).replace(/div><div/g, `div>
     },
     preview: {
       title: "Voorbeeld",
-      readMore: "Lees meer"
+      readMore: "Lees verder op Wikipedia"
     },
     errors: {
       invalid: "Gelieve een geldig Q-ID of een wikipedia url in te geven.",
@@ -2352,7 +2352,11 @@ let g = class extends Z {
 						  ` : ""}
 
 					<div class="read-more">
-						${this.pageSource ? A`<p>${this.content.preview.readMore}: <a href="${this.pageSource}">${this.pageSource}</a></p>` : ""}
+						${this.pageSource ? A`<p>
+									<a href="${this.pageSource}"
+										>${this.content.preview.readMore} <img src="/external-link-icon.svg" alt="external link icon" />
+									</a>
+							  </p>` : ""}
 					</div>
 				</div>
 			</div>

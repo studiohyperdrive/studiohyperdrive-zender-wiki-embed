@@ -31,7 +31,7 @@ export const translatedContent = {
 		},
 		preview: {
 			title: 'Preview',
-			readMore: 'Read more',
+			readMore: 'Read more on Wikipedia',
 		},
 		errors: {
 			invalid: 'Please enter a valid Q-ID or a Wikipedia url.',
@@ -67,7 +67,7 @@ export const translatedContent = {
 		},
 		preview: {
 			title: 'Voorbeeld',
-			readMore: 'Lees meer',
+			readMore: 'Lees verder op Wikipedia',
 		},
 		errors: {
 			invalid: 'Gelieve een geldig Q-ID of een wikipedia url in te geven.',

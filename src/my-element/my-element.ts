@@ -508,7 +508,11 @@ export class MyElement extends LitElement {
 
 					<div class="read-more">
 						${this.pageSource
-							? html`<p>${this.content.preview.readMore}: <a href="${this.pageSource}">${this.pageSource}</a></p>`
+							? html`<p>
+									<a href="${this.pageSource}"
+										>${this.content.preview.readMore} <img src="/external-link-icon.svg" alt="external link icon" />
+									</a>
+							  </p>`
 							: ''}
 					</div>
 				</div>

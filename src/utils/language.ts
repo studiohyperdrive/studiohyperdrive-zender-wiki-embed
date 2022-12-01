@@ -74,4 +74,14 @@ export const translatedContent = {
 			notSupported: 'Nederlandse versie van dit artikel kon niet teruggevonden worden.',
 		},
 	},
+	de: {
+		preview: {
+			readMore: 'Lesen Sie mehr auf Wikipedia',
+		},
+	},
+	fr: {
+		preview: {
+			readMore: 'En savoir plus sur Wikipedia',
+		},
+	},
 };

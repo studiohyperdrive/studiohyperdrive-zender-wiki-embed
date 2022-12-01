@@ -60,6 +60,10 @@ export class MyElement extends LitElement {
 	activeLanguage = currentLanguage;
 	@property()
 	content = this.activeLanguage === 'nl' ? translatedContent.nl : translatedContent.en;
+	@property()
+	readMoreLabel =
+		translatedContent?.[this.activeLanguage as 'nl' | 'en' | 'fr' | 'de']?.preview?.readMore ??
+		translatedContent.en.preview.readMore;
 
 	radioGroup = [
 		{
@@ -98,6 +102,10 @@ export class MyElement extends LitElement {
 
 		if (this.isConfigMode && changedProperties.has('activeLanguage') && changedProperties.get('activeLanguage')) {
 			this.content = this.activeLanguage === 'nl' ? translatedContent.nl : translatedContent.en;
+			this.readMoreLabel =
+				translatedContent?.[this.activeLanguage as 'nl' | 'en']?.preview?.readMore ??
+				translatedContent.en.preview.readMore;
+
 			this.radioGroup = [
 				{
 					id: 'img-left',
@@ -509,8 +517,8 @@ export class MyElement extends LitElement {
 					<div class="read-more">
 						${this.pageSource
 							? html`<p>
-									<a href="${this.pageSource}"
-										>${this.content.preview.readMore} <img src="/external-link-icon.svg" alt="external link icon" />
+									<a target="_blank" href="${this.pageSource}"
+										>${this.readMoreLabel} <img src="/external-link-icon.svg" alt="external link icon" />
 									</a>
 							  </p>`
 							: ''}

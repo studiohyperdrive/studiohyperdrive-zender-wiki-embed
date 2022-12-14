@@ -518,7 +518,11 @@ export class MyElement extends LitElement {
 						${this.pageSource
 							? html`<p>
 									<a target="_blank" href="${this.pageSource}"
-										>${this.readMoreLabel} <img src="/external-link-icon.svg" alt="external link icon" />
+										>${this.readMoreLabel}
+										<img
+											src="https://wikipedia.org/w/skins/Vector/resources/common/images/link-external-small-ltr-progressive.svg"
+											onerror='this.onerror = null; this.src="https://wiki-embed.toolforge.org/external-link-icon.svg"'
+											alt="external link icon" />
 									</a>
 							  </p>`
 							: ''}
